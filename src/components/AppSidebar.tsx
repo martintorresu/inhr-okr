@@ -9,6 +9,7 @@ import {
   Settings,
   Play,
   RotateCcw,
+  LogOut,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -16,6 +17,7 @@ interface AppSidebarProps {
   onNavigate: (page: string) => void;
   onLoadDemo: () => void;
   onResetDemo: () => void;
+  onLogout: () => void;
 }
 
 const navItems = [
@@ -27,7 +29,7 @@ const navItems = [
   { id: "alerts", label: "Alertas", icon: AlertTriangle },
 ];
 
-const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo }: AppSidebarProps) => {
+const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout }: AppSidebarProps) => {
   return (
     <aside className="w-64 min-h-screen bg-sidebar flex flex-col">
       {/* Logo */}
@@ -80,16 +82,25 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo }: AppSid
         </button>
       </div>
 
-      {/* User */}
+      {/* User + Logout */}
       <div className="p-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary">
-            MG
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary shrink-0">
+              MG
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-sidebar-accent-foreground truncate">María González</p>
+              <p className="text-xs text-sidebar-muted">Admin</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">María González</p>
-            <p className="text-xs text-sidebar-muted">Admin</p>
-          </div>
+          <button
+            onClick={onLogout}
+            title="Cerrar sesión"
+            className="p-1.5 rounded-lg text-sidebar-muted hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50 transition-colors shrink-0"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>
