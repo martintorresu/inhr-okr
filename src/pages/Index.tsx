@@ -6,6 +6,7 @@ import InitiativesPage from "@/components/InitiativesPage";
 import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
 import AlertsPage from "@/components/AlertsPage";
+import LoginPage from "@/components/LoginPage";
 import { toast } from "sonner";
 
 const pages: Record<string, React.FC> = {
@@ -18,6 +19,7 @@ const pages: Record<string, React.FC> = {
 };
 
 const Index = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
 
   const PageComponent = pages[currentPage] || DashboardPage;
@@ -31,6 +33,16 @@ const Index = () => {
     toast.info("Demo reiniciado", { description: "Todos los datos fueron restablecidos" });
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage("dashboard");
+    toast.info("Sesión cerrada");
+  };
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <AppSidebar
@@ -38,6 +50,7 @@ const Index = () => {
         onNavigate={setCurrentPage}
         onLoadDemo={handleLoadDemo}
         onResetDemo={handleResetDemo}
+        onLogout={handleLogout}
       />
       <main className="flex-1 p-8 overflow-auto">
         <PageComponent />
