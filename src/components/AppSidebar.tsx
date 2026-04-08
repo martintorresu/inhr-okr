@@ -1,0 +1,99 @@
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Target,
+  Rocket,
+  ClipboardCheck,
+  Users,
+  AlertTriangle,
+  Settings,
+  Play,
+  RotateCcw,
+} from "lucide-react";
+
+interface AppSidebarProps {
+  currentPage: string;
+  onNavigate: (page: string) => void;
+  onLoadDemo: () => void;
+  onResetDemo: () => void;
+}
+
+const navItems = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "okrs", label: "OKRs", icon: Target },
+  { id: "initiatives", label: "Iniciativas", icon: Rocket },
+  { id: "checkins", label: "Check-ins", icon: ClipboardCheck },
+  { id: "team", label: "Equipo", icon: Users },
+  { id: "alerts", label: "Alertas", icon: AlertTriangle },
+];
+
+const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo }: AppSidebarProps) => {
+  return (
+    <aside className="w-64 min-h-screen bg-sidebar flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
+            <Target className="w-5 h-5 text-sidebar-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-sidebar-primary-foreground tracking-tight">InHR</h1>
+            <p className="text-[11px] text-sidebar-muted font-medium tracking-widest uppercase">Strategy</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 p-3 space-y-1">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+              currentPage === item.id
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+            )}
+          >
+            <item.icon className="w-4.5 h-4.5" />
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Demo controls */}
+      <div className="p-4 border-t border-sidebar-border space-y-2">
+        <button
+          onClick={onLoadDemo}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <Play className="w-4 h-4" />
+          Cargar Demo
+        </button>
+        <button
+          onClick={onResetDemo}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-sidebar-border text-sidebar-muted text-sm font-medium hover:bg-sidebar-accent/30 transition-colors"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Reset Demo
+        </button>
+      </div>
+
+      {/* User */}
+      <div className="p-4 border-t border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary">
+            MG
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-sidebar-accent-foreground truncate">María González</p>
+            <p className="text-xs text-sidebar-muted">Admin</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default AppSidebar;
