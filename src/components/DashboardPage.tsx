@@ -101,7 +101,7 @@ const DashboardPage = () => {
             {objectives.map((obj) => (
               <div key={obj.id} className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground truncate max-w-[250px]">{obj.title}</span>
+                  <span className="text-sm font-medium text-foreground">{obj.title}</span>
                   <span className="text-xs text-muted-foreground">{obj.progress}%</span>
                 </div>
                 <Progress value={obj.progress} className="h-2" />
