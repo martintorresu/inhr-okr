@@ -1,24 +1,34 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/StatusBadge";
-import { objectives } from "@/data/mockData";
+import { objectives as defaultObjectives } from "@/data/mockData";
+import type { Objective } from "@/data/mockData";
 import { ChevronDown, ChevronRight, Target } from "lucide-react";
 import { useState } from "react";
+import CreateOKRDialog from "@/components/CreateOKRDialog";
 
 const OKRsPage = () => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
+  const [allObjectives, setAllObjectives] = useState<Objective[]>(defaultObjectives);
+
+  const handleCreateOKR = (newObj: Objective) => {
+    setAllObjectives((prev) => [newObj, ...prev]);
+  };
 
   const toggle = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">OKRs</h2>
-        <p className="text-muted-foreground text-sm mt-1">Q2 2026 · Objetivos y Key Results</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">OKRs</h2>
+          <p className="text-muted-foreground text-sm mt-1">Q2 2026 · Objetivos y Key Results</p>
+        </div>
+        <CreateOKRDialog onCreateOKR={handleCreateOKR} />
       </div>
 
       <div className="space-y-4">
-        {objectives.map((obj) => (
+        {allObjectives.map((obj) => (
           <Card key={obj.id} className="glass-card overflow-hidden">
             <button
               onClick={() => toggle(obj.id)}
