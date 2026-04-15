@@ -19,13 +19,16 @@ const OKRsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">OKRs</h2>
-        <p className="text-muted-foreground text-sm mt-1">Q2 2026 · Objetivos y Key Results</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">OKRs</h2>
+          <p className="text-muted-foreground text-sm mt-1">Q2 2026 · Objetivos y Key Results</p>
+        </div>
+        <CreateOKRDialog onCreateOKR={handleCreateOKR} />
       </div>
 
       <div className="space-y-4">
-        {objectives.map((obj) => (
+        {allObjectives.map((obj) => (
           <Card key={obj.id} className="glass-card overflow-hidden">
             <button
               onClick={() => toggle(obj.id)}
