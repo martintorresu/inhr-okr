@@ -1,12 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import StatusBadge from "@/components/StatusBadge";
-import { objectives } from "@/data/mockData";
+import { objectives as defaultObjectives } from "@/data/mockData";
+import type { Objective } from "@/data/mockData";
 import { ChevronDown, ChevronRight, Target } from "lucide-react";
 import { useState } from "react";
+import CreateOKRDialog from "@/components/CreateOKRDialog";
 
 const OKRsPage = () => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
+  const [allObjectives, setAllObjectives] = useState<Objective[]>(defaultObjectives);
+
+  const handleCreateOKR = (newObj: Objective) => {
+    setAllObjectives((prev) => [newObj, ...prev]);
+  };
 
   const toggle = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
