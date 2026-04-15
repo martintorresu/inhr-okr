@@ -5,6 +5,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   at_risk: { label: "En riesgo", className: "bg-warning/15 text-warning" },
   behind: { label: "Retrasado", className: "bg-danger/15 text-danger" },
   completed: { label: "Completado", className: "bg-success/15 text-success" },
+  draft: { label: "Borrador", className: "bg-muted text-muted-foreground" },
   not_started: { label: "Sin iniciar", className: "bg-muted text-muted-foreground" },
   in_progress: { label: "En progreso", className: "bg-info/15 text-info" },
   blocked: { label: "Bloqueado", className: "bg-danger/15 text-danger" },
