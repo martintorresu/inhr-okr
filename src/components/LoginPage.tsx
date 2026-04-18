@@ -17,7 +17,11 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
+      <div className="absolute top-4 left-4 flex flex-col items-center gap-1">
+        <img src={inhrLogo} alt="InHR" className="h-10 w-auto object-contain" />
+        <span className="text-xs text-muted-foreground">Powered by InHR</span>
+      </div>
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center gap-3">
           {activeTenant.logo ? (
