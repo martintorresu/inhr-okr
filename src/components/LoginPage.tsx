@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Target } from "lucide-react";
 import { activeTenant } from "@/data/tenant";
+import inhrLogo from "@/assets/inhr-logo.png";
 
 interface LoginPageProps {
   onLogin: () => void;
