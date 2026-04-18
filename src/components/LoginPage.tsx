@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Target } from "lucide-react";
+import { activeTenant } from "@/data/tenant";
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -18,11 +19,17 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
-            <Target className="w-8 h-8 text-primary-foreground" />
-          </div>
+          {activeTenant.logo ? (
+            <div className="w-16 h-16 rounded-2xl bg-white border border-border flex items-center justify-center overflow-hidden">
+              <img src={activeTenant.logo} alt={activeTenant.company_name} className="w-full h-full object-contain" />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+              <Target className="w-8 h-8 text-primary-foreground" />
+            </div>
+          )}
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">InHR Strategy</h1>
+            <h1 className="text-2xl font-bold text-foreground">{activeTenant.app_name}</h1>
             <p className="text-sm text-muted-foreground mt-1">Gestión estratégica de OKRs</p>
           </div>
         </div>
@@ -35,7 +42,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="maria@demo.com"
+              placeholder={activeTenant.users[0]?.email ?? "demo@demo.com"}
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
