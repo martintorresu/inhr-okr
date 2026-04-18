@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { activeTenant } from "@/data/tenant";
 import {
   LayoutDashboard,
   Target,
@@ -35,11 +36,17 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Target className="w-5 h-5 text-sidebar-primary-foreground" />
-          </div>
+          {activeTenant.logo ? (
+            <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden shrink-0">
+              <img src={activeTenant.logo} alt={activeTenant.company_name} className="w-full h-full object-contain" />
+            </div>
+          ) : (
+            <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
+              <Target className="w-5 h-5 text-sidebar-primary-foreground" />
+            </div>
+          )}
           <div>
-            <h1 className="text-base font-bold text-sidebar-primary-foreground tracking-tight">InHR</h1>
+            <h1 className="text-base font-bold text-sidebar-primary-foreground tracking-tight">{activeTenant.company_name}</h1>
             <p className="text-[11px] text-sidebar-muted font-medium tracking-widest uppercase">Strategy</p>
           </div>
         </div>
