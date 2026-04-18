@@ -42,7 +42,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="maria@demo.com"
+              placeholder={activeTenant.users[0]?.email ?? "demo@demo.com"}
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
