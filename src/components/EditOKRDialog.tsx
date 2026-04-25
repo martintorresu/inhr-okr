@@ -485,6 +485,35 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Confirmar cambios al OKR?</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2">
+              <p>
+                Vas a guardar las siguientes modificaciones en{" "}
+                <strong className="text-foreground">{objective?.title}</strong>:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-foreground">
+                {changeSummary.map((c, i) => (
+                  <li key={i}>{c}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground pt-2">
+                Esta acción actualizará el OKR para todos los usuarios. Podés cancelar para revisar los datos.
+              </p>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmSave}>Confirmar y guardar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
