@@ -295,11 +295,16 @@ const CheckInsPage = ({
                           {last ? `${last.checkinDate} · ${last.authorName}` : "Sin check-in"}
                         </TableCell>
                         <TableCell className="text-right">
-                          {last && (
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(last)}>
-                              <Pencil className="w-3.5 h-3.5" />
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" title="Ver evolución" onClick={() => setTimelineObj(obj)}>
+                              <LineChartIcon className="w-3.5 h-3.5" />
                             </Button>
-                          )}
+                            {last && (
+                              <Button variant="ghost" size="icon" title="Editar último check-in" onClick={() => openEdit(last)}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
