@@ -102,6 +102,7 @@ const CheckInsPage = ({
   const [tab, setTab] = useState<"individual" | "admin">("individual");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
+  const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
 
   const objectiveById = useMemo(() => Object.fromEntries(objectives.map((o) => [o.id, o])), [objectives]);
   const initiativesByKR = useMemo(() => {
