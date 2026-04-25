@@ -73,6 +73,9 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
   const [level, setLevel] = useState<"company" | "area" | "project">("area");
   const [status, setStatus] = useState<Objective["status"]>("draft");
   const [keyResults, setKeyResults] = useState<KRDraft[]>([emptyKR()]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
+  const [changeSummary, setChangeSummary] = useState<string[]>([]);
 
   useEffect(() => {
     if (objective && open) {
