@@ -83,34 +83,34 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[linear-gradient(135deg,hsl(25_15%_96%)_0%,hsl(25_20%_92%)_50%,hsl(220_8%_88%)_100%)]">
-      {/* Decorative animated blobs */}
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[linear-gradient(180deg,hsl(220_15%_94%)_0%,hsl(25_25%_94%)_100%)]">
+      {/* Large blue sphere — top */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 -left-32 w-[28rem] h-[28rem] rounded-full bg-[hsl(22_95%_58%/0.35)] blur-3xl animate-pulse"
+        className="pointer-events-none absolute -top-[28%] left-1/2 -translate-x-[55%] w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full blur-2xl opacity-90"
+        style={{
+          background:
+            "radial-gradient(circle at 35% 35%, hsl(220 90% 62%) 0%, hsl(220 80% 45%) 45%, hsl(220 60% 30% / 0.85) 75%, transparent 100%)",
+        }}
       />
+      {/* Large orange/coral sphere — bottom */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-40 -right-24 w-[32rem] h-[32rem] rounded-full bg-[hsl(220_10%_55%/0.30)] blur-3xl animate-pulse"
-        style={{ animationDelay: "1.2s" }}
+        className="pointer-events-none absolute -bottom-[30%] left-1/2 -translate-x-[35%] w-[85vw] h-[85vw] max-w-[950px] max-h-[950px] rounded-full blur-2xl opacity-90"
+        style={{
+          background:
+            "radial-gradient(circle at 40% 40%, hsl(18 95% 68%) 0%, hsl(15 90% 60%) 40%, hsl(340 80% 55% / 0.85) 75%, transparent 100%)",
+        }}
       />
+      {/* Subtle grey accent for depth */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/3 right-1/4 w-72 h-72 rounded-full bg-[hsl(30_90%_65%/0.25)] blur-2xl animate-pulse"
-        style={{ animationDelay: "2.4s" }}
+        className="pointer-events-none absolute top-1/2 -left-32 w-[28rem] h-[28rem] rounded-full bg-[hsl(220_10%_60%/0.18)] blur-3xl"
       />
-      {/* Geometric accent shapes */}
+      {/* Soft white veil to lift card readability */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-20 left-1/4 w-24 h-24 rotate-45 rounded-2xl bg-[hsl(22_95%_58%/0.18)] backdrop-blur-sm"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-24 left-16 w-16 h-16 rounded-full border-2 border-[hsl(22_95%_58%/0.35)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-10 w-20 h-20 rotate-12 rounded-xl border-2 border-[hsl(220_10%_50%/0.30)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_100%/0.35)_0%,transparent_70%)]"
       />
 
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
