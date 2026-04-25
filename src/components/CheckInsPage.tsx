@@ -356,6 +356,22 @@ const CheckInsPage = ({
         onClose={() => setEditor({ open: false, draft: null })}
         onSave={save}
       />
+
+      <Dialog open={!!timelineObj} onOpenChange={(o) => !o && setTimelineObj(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Evolución · {timelineObj?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {timelineObj && <CheckInTimeline checkIns={checkIns} objectiveId={timelineObj.id} />}
+          <div className="text-xs text-muted-foreground flex gap-4 pt-2">
+            <span><span className="inline-block w-3 h-0.5 bg-primary mr-1 align-middle" /> Progreso</span>
+            <span><span className="inline-block w-3 h-0.5 bg-success mr-1 align-middle" /> Score (×100)</span>
+            <span><span className="inline-block w-3 h-0.5 bg-warning mr-1 align-middle" /> Confianza</span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
