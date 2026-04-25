@@ -56,6 +56,56 @@
     --sidebar-ring: 220 70% 50%;
     --sidebar-muted: 220 15% 55%;
   }
+
+  /* InovaHR tenant — vibrant palette (electric blue + magenta + lime) */
+  :root[data-tenant="inovahr"] {
+    --background: 240 30% 98%;
+    --foreground: 240 50% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 50% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 50% 12%;
+
+    --primary: 265 85% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 190 90% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 30% 95%;
+    --muted-foreground: 250 15% 40%;
+
+    --accent: 325 85% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 250 30% 88%;
+    --input: 250 30% 88%;
+    --ring: 265 85% 58%;
+
+    --success: 152 75% 42%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 100% 52%;
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 58%;
+    --danger-foreground: 0 0% 100%;
+    --info: 190 90% 50%;
+    --info-foreground: 0 0% 100%;
+
+    --sidebar-background: 265 70% 18%;
+    --sidebar-foreground: 250 30% 88%;
+    --sidebar-primary: 325 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 265 60% 26%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 265 50% 28%;
+    --sidebar-ring: 325 85% 60%;
+    --sidebar-muted: 250 30% 70%;
+  }
 }
 
 @layer base {

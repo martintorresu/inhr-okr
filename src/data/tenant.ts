@@ -26,3 +26,7 @@ const tenants: Record<string, TenantModule> = {
 
 export const activeTenant: TenantModule = tenants[tenantId] ?? inhr;
 export const activeTenantId = tenantId;
+
+if (typeof document !== "undefined") {
+  document.documentElement.setAttribute("data-tenant", tenantId);
+}
