@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { activeTenant } from "@/data/tenant";
+import { activeTenant, activeTenantId } from "@/data/tenant";
 import {
   LayoutDashboard,
   Target,
@@ -71,23 +71,25 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
         ))}
       </nav>
 
-      {/* Demo controls */}
-      <div className="p-4 border-t border-sidebar-border space-y-2">
-        <button
-          onClick={onLoadDemo}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Play className="w-4 h-4" />
-          Cargar Demo
-        </button>
-        <button
-          onClick={onResetDemo}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-sidebar-border text-sidebar-muted text-sm font-medium hover:bg-sidebar-accent/30 transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Reset Demo
-        </button>
-      </div>
+      {/* Demo controls — hidden for InovaHR tenant */}
+      {activeTenantId !== "inovahr" && (
+        <div className="p-4 border-t border-sidebar-border space-y-2">
+          <button
+            onClick={onLoadDemo}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Play className="w-4 h-4" />
+            Cargar Demo
+          </button>
+          <button
+            onClick={onResetDemo}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-sidebar-border text-sidebar-muted text-sm font-medium hover:bg-sidebar-accent/30 transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset Demo
+          </button>
+        </div>
+      )}
 
       {/* User + Logout */}
       <div className="p-4 border-t border-sidebar-border">
