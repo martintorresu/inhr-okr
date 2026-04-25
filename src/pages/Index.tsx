@@ -257,12 +257,22 @@ const Index = () => {
             currentUserId={currentUser.id}
             onUpsert={handleCheckInUpsert}
             onDelete={handleCheckInDelete}
+            schedules={schedules}
+            onScheduleUpsert={handleScheduleUpsert}
           />
         );
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
-        return <AlertsPage />;
+        return (
+          <AlertsPage
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+            onNavigate={setCurrentPage}
+          />
+        );
       default:
         return <DashboardPage objectives={objectives} initiatives={initiatives} />;
     }
