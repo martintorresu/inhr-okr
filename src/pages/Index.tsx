@@ -9,7 +9,7 @@ import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
 import AlertsPage from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
-import { objectives as defaultObjectives, users as defaultUsers } from "@/data/mockData";
+import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
 import { loadTenantObjectives, replaceTenantObjectives } from "@/lib/okrPersistence";
@@ -27,6 +27,13 @@ import {
   seedTeamFromMocks,
   type TeamMember,
 } from "@/lib/teamPersistence";
+import {
+  loadTenantCheckIns,
+  upsertCheckIn,
+  deleteCheckIn,
+  seedCheckInsFromMocks,
+  type CheckInRecord,
+} from "@/lib/checkInsPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
 
@@ -37,6 +44,9 @@ const Index = () => {
   const [loadedObjectives, setLoadedObjectives] = useState(false);
   const [initiatives, setInitiatives] = useState<InitiativeWithContext[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [checkIns, setCheckIns] = useState<CheckInRecord[]>([]);
+  const [currentUser, setCurrentUser] = useState<{ id: string | null; name: string }>({ id: null, name: "Yo" });
+  const [isAdmin, setIsAdmin] = useState(false);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   const skipNextPersist = useRef(false);
 
@@ -93,6 +103,34 @@ const Index = () => {
         } else if (defaultUsers.length) {
           const seededTeam = await seedTeamFromMocks(activeTenantId, defaultUsers);
           if (!cancelled) setTeam(seededTeam);
+        }
+
+        // Check-ins: load from table, seed from mocks on first run.
+        const storedCheckIns = await loadTenantCheckIns(activeTenantId);
+        if (cancelled) return;
+        if (storedCheckIns.length) {
+          setCheckIns(storedCheckIns);
+        } else if (defaultCheckIns.length) {
+          const seededCI = await seedCheckInsFromMocks(activeTenantId, defaultCheckIns);
+          if (!cancelled) setCheckIns(seededCI);
+        }
+
+        // Resolve current user + admin role.
+        if (isDemoTenant) {
+          setCurrentUser({ id: null, name: "Administrador demo" });
+          setIsAdmin(true);
+        } else {
+          const { data: sessionData } = await supabase.auth.getSession();
+          const user = sessionData.session?.user;
+          if (user) {
+            const name = (user.user_metadata?.full_name as string)
+              || (user.user_metadata?.name as string)
+              || user.email
+              || "Usuario";
+            setCurrentUser({ id: user.id, name });
+            const { data: adminCheck } = await (supabase as any).rpc("is_tenant_admin", { _tenant_id: activeTenantId });
+            if (!cancelled) setIsAdmin(!!adminCheck);
+          }
         }
       } catch (error) {
         const msg = error instanceof Error ? error.message : "No se pudieron cargar los datos";
@@ -155,6 +193,21 @@ const Index = () => {
     setTeam((prev) => prev.filter((m) => m.id !== id));
   };
 
+  const handleCheckInUpsert = async (ci: CheckInRecord) => {
+    const enriched: CheckInRecord = { ...ci, authorUserId: ci.authorUserId ?? currentUser.id, authorName: ci.authorName || currentUser.name };
+    await upsertCheckIn(activeTenantId, enriched);
+    setCheckIns((prev) => {
+      const idx = prev.findIndex((c) => c.id === enriched.id);
+      if (idx === -1) return [enriched, ...prev];
+      const next = [...prev]; next[idx] = enriched; return next;
+    });
+  };
+
+  const handleCheckInDelete = async (id: string) => {
+    await deleteCheckIn(activeTenantId, id);
+    setCheckIns((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
@@ -176,7 +229,19 @@ const Index = () => {
           />
         );
       case "checkins":
-        return <CheckInsPage />;
+        return (
+          <CheckInsPage
+            objectives={objectives}
+            initiatives={initiatives}
+            team={team}
+            checkIns={checkIns}
+            isAdmin={isAdmin}
+            currentUserName={currentUser.name}
+            currentUserId={currentUser.id}
+            onUpsert={handleCheckInUpsert}
+            onDelete={handleCheckInDelete}
+          />
+        );
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
