@@ -4,7 +4,7 @@ import type { User, Objective, CheckIn, Alert } from "@/data/types";
 export const company_id = "inovahr";
 export const company_name = "InovaHR";
 export const app_name = "InovaHR Strategy";
-export const logo: string | null = null;
+export const logo = "/logos/inovahr.png";
 
 export const areas = ["Dirección General"];
 
