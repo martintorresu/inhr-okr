@@ -7,7 +7,7 @@ import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
 import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
-import AlertsPage from "@/components/AlertsPage";
+import AlertsPage, { computeAlerts } from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
 import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
