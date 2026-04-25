@@ -9,7 +9,7 @@ import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
 import AlertsPage from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
-import { objectives as defaultObjectives } from "@/data/mockData";
+import { objectives as defaultObjectives, users as defaultUsers } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
 import { loadTenantObjectives, replaceTenantObjectives } from "@/lib/okrPersistence";
@@ -20,6 +20,13 @@ import {
   seedInitiativesFromObjectives,
   type InitiativeWithContext,
 } from "@/lib/initiativesPersistence";
+import {
+  loadTenantTeam,
+  upsertTeamMember,
+  deleteTeamMember,
+  seedTeamFromMocks,
+  type TeamMember,
+} from "@/lib/teamPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
 
@@ -29,6 +36,7 @@ const Index = () => {
   const [objectives, setObjectives] = useState<Objective[]>(defaultObjectives);
   const [loadedObjectives, setLoadedObjectives] = useState(false);
   const [initiatives, setInitiatives] = useState<InitiativeWithContext[]>([]);
+  const [team, setTeam] = useState<TeamMember[]>([]);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   const skipNextPersist = useRef(false);
 
@@ -76,6 +84,16 @@ const Index = () => {
           const seeded = await seedInitiativesFromObjectives(activeTenantId, activeObjectives);
           if (!cancelled) setInitiatives(seeded);
         }
+
+        // Team: load from table, seed from mocks on first run.
+        const storedTeam = await loadTenantTeam(activeTenantId);
+        if (cancelled) return;
+        if (storedTeam.length) {
+          setTeam(storedTeam);
+        } else if (defaultUsers.length) {
+          const seededTeam = await seedTeamFromMocks(activeTenantId, defaultUsers);
+          if (!cancelled) setTeam(seededTeam);
+        }
       } catch (error) {
         const msg = error instanceof Error ? error.message : "No se pudieron cargar los datos";
         toast.error(msg);
@@ -121,6 +139,22 @@ const Index = () => {
     setInitiatives((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const handleTeamUpsert = async (m: TeamMember) => {
+    await upsertTeamMember(activeTenantId, m);
+    setTeam((prev) => {
+      const idx = prev.findIndex((p) => p.id === m.id);
+      if (idx === -1) return [...prev, m].sort((a, b) => a.name.localeCompare(b.name));
+      const next = [...prev];
+      next[idx] = m;
+      return next;
+    });
+  };
+
+  const handleTeamDelete = async (id: string) => {
+    await deleteTeamMember(activeTenantId, id);
+    setTeam((prev) => prev.filter((m) => m.id !== id));
+  };
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
@@ -136,6 +170,7 @@ const Index = () => {
           <InitiativesPage
             objectives={objectives}
             initiatives={initiatives}
+            team={team}
             onUpsert={handleInitiativeUpsert}
             onDelete={handleInitiativeDelete}
           />
@@ -143,7 +178,7 @@ const Index = () => {
       case "checkins":
         return <CheckInsPage />;
       case "team":
-        return <TeamPage />;
+        return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
         return <AlertsPage />;
       default:

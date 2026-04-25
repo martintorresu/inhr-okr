@@ -16,11 +16,13 @@ import StatusBadge from "@/components/StatusBadge";
 import { Rocket, Calendar, User, Plus, Pencil, Trash2, AlertCircle } from "lucide-react";
 import type { Objective, Task } from "@/data/mockData";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
+import type { TeamMember } from "@/lib/teamPersistence";
 import { toast } from "sonner";
 
 interface Props {
   objectives: Objective[];
   initiatives: InitiativeWithContext[];
+  team: TeamMember[];
   onUpsert: (ini: InitiativeWithContext) => Promise<void> | void;
   onDelete: (id: string) => Promise<void> | void;
 }
@@ -51,7 +53,7 @@ const emptyForm = (): FormState => ({
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
-const InitiativesPage = ({ objectives, initiatives, onUpsert, onDelete }: Props) => {
+const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: Props) => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [newTask, setNewTask] = useState("");
@@ -207,7 +209,19 @@ const InitiativesPage = ({ objectives, initiatives, onUpsert, onDelete }: Props)
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Responsable</Label>
-                  <Input value={form.responsible} onChange={(e) => setForm({ ...form, responsible: e.target.value })} />
+                  <Select value={form.responsible} onValueChange={(v) => setForm({ ...form, responsible: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={team.length ? "Selecciona del equipo" : "Agrega miembros en Equipo"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {team.map((m) => (
+                        <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                      ))}
+                      {form.responsible && !team.some((m) => m.name === form.responsible) && (
+                        <SelectItem value={form.responsible}>{form.responsible} (externo)</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Estado</Label>
