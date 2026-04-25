@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      okr_objectives: {
+        Row: {
+          area: string
+          contributors: string[]
+          created_at: string
+          description: string
+          id: string
+          key_results: Json
+          level: string
+          owner: string
+          parent_id: string | null
+          progress: number
+          quarter: string
+          status: string
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          contributors?: string[]
+          created_at?: string
+          description?: string
+          id: string
+          key_results?: Json
+          level?: string
+          owner: string
+          parent_id?: string | null
+          progress?: number
+          quarter: string
+          status?: string
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          contributors?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          key_results?: Json
+          level?: string
+          owner?: string
+          parent_id?: string | null
+          progress?: number
+          quarter?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
