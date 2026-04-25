@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Info, Eye, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Info, Eye, ArrowLeft, UserPlus, X, Mail, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { areas, users } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
@@ -19,6 +19,15 @@ interface KRDraft {
   direction: "higher_is_better" | "lower_is_better";
   weight: string;
 }
+
+interface ExternalContributor {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[+0-9\s()-]{6,20}$/;
 
 interface CreateOKRDialogProps {
   onCreateOKR: (objective: Objective) => void;
@@ -57,6 +66,10 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
   const [cycle, setCycle] = useState("");
   const [level, setLevel] = useState<"company" | "area" | "project">("area");
   const [keyResults, setKeyResults] = useState<KRDraft[]>([emptyKR()]);
+  const [externalContributors, setExternalContributors] = useState<ExternalContributor[]>([]);
+  const [extName, setExtName] = useState("");
+  const [extEmail, setExtEmail] = useState("");
+  const [extPhone, setExtPhone] = useState("");
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
@@ -80,12 +93,54 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
     );
   };
 
+  const addExternalContributor = () => {
+    const name = extName.trim();
+    const email = extEmail.trim();
+    const phone = extPhone.trim();
+    if (!name) {
+      toast.error("El nombre del contribuidor externo es obligatorio");
+      return;
+    }
+    if (name.length > 100) {
+      toast.error("El nombre no debe superar 100 caracteres");
+      return;
+    }
+    if (email && !emailRegex.test(email)) {
+      toast.error("Email inválido");
+      return;
+    }
+    if (phone && !phoneRegex.test(phone)) {
+      toast.error("Teléfono inválido");
+      return;
+    }
+    if (
+      externalContributors.some((c) => c.name.toLowerCase() === name.toLowerCase()) ||
+      contributors.some((c) => c.toLowerCase() === name.toLowerCase())
+    ) {
+      toast.error("Ese contribuidor ya fue agregado");
+      return;
+    }
+    setExternalContributors([...externalContributors, { name, email, phone }]);
+    setExtName("");
+    setExtEmail("");
+    setExtPhone("");
+    toast.success("Contribuidor externo agregado");
+  };
+
+  const removeExternalContributor = (name: string) => {
+    setExternalContributors(externalContributors.filter((c) => c.name !== name));
+  };
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setArea("");
     setOwner("");
     setContributors([]);
+    setExternalContributors([]);
+    setExtName("");
+    setExtEmail("");
+    setExtPhone("");
     setCycle("");
     setLevel("area");
     setKeyResults([emptyKR()]);
@@ -137,7 +192,7 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
       progress: 0,
       status: "draft",
       quarter: cycle,
-      contributors,
+      contributors: [...contributors, ...externalContributors.map((c) => c.name)],
       keyResults: validKRs.map((kr, i) => ({
         id: `kr_${Date.now()}_${i}`,
         title: kr.title.trim(),
@@ -255,19 +310,87 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
             </div>
 
             {/* Contributors */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Contribuidores (opcional)</Label>
-              <div className="flex flex-wrap gap-2">
-                {users.filter((u) => u.name !== owner).map((u) => (
-                  <Badge
-                    key={u.id}
-                    variant={contributors.includes(u.name) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => toggleContributor(u.name)}
-                  >
-                    {u.name}
-                  </Badge>
-                ))}
+
+              {/* Internos */}
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Internos del equipo</p>
+                <div className="flex flex-wrap gap-2">
+                  {users.filter((u) => u.name !== owner).map((u) => (
+                    <Badge
+                      key={u.id}
+                      variant={contributors.includes(u.name) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => toggleContributor(u.name)}
+                    >
+                      {u.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Externos */}
+              <div className="space-y-2 p-3 rounded-lg border border-border/50 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-medium text-foreground">Agregar contribuidor externo (consultor, amigo, referido)</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Input
+                    placeholder="Nombre *"
+                    value={extName}
+                    onChange={(e) => setExtName(e.target.value)}
+                    maxLength={100}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={extEmail}
+                    onChange={(e) => setExtEmail(e.target.value)}
+                    maxLength={255}
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Teléfono"
+                    value={extPhone}
+                    onChange={(e) => setExtPhone(e.target.value)}
+                    maxLength={20}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button type="button" variant="outline" size="sm" onClick={addExternalContributor} className="gap-1">
+                    <Plus className="w-3 h-3" /> Agregar
+                  </Button>
+                </div>
+
+                {externalContributors.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {externalContributors.map((c) => (
+                      <Badge key={c.name} variant="default" className="gap-1.5 pr-1 py-1">
+                        <span>{c.name}</span>
+                        {c.email && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] opacity-80">
+                            <Mail className="w-2.5 h-2.5" />{c.email}
+                          </span>
+                        )}
+                        {c.phone && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] opacity-80">
+                            <Phone className="w-2.5 h-2.5" />{c.phone}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExternalContributor(c.name)}
+                          className="ml-1 rounded-sm hover:bg-background/20 p-0.5"
+                          aria-label={`Eliminar ${c.name}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -371,12 +494,30 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
                 <span><strong>Área:</strong> {area}</span>
                 <span><strong>Owner:</strong> {owner}</span>
               </div>
-              {contributors.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  <span className="text-xs text-muted-foreground mr-1">Contribuidores:</span>
-                  {contributors.map((c) => (
-                    <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
-                  ))}
+              {(contributors.length > 0 || externalContributors.length > 0) && (
+                <div className="space-y-1.5">
+                  {contributors.length > 0 && (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <span className="text-xs text-muted-foreground mr-1">Contribuidores:</span>
+                      {contributors.map((c) => (
+                        <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {externalContributors.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Externos:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {externalContributors.map((c) => (
+                          <Badge key={c.name} variant="secondary" className="text-xs gap-1.5">
+                            <span className="font-medium">{c.name}</span>
+                            {c.email && <span className="opacity-80">· {c.email}</span>}
+                            {c.phone && <span className="opacity-80">· {c.phone}</span>}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
