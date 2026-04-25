@@ -44,6 +44,9 @@ const Index = () => {
   const [loadedObjectives, setLoadedObjectives] = useState(false);
   const [initiatives, setInitiatives] = useState<InitiativeWithContext[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [checkIns, setCheckIns] = useState<CheckInRecord[]>([]);
+  const [currentUser, setCurrentUser] = useState<{ id: string | null; name: string }>({ id: null, name: "Yo" });
+  const [isAdmin, setIsAdmin] = useState(false);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   const skipNextPersist = useRef(false);
 
