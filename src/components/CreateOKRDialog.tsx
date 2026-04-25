@@ -494,12 +494,30 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
                 <span><strong>Área:</strong> {area}</span>
                 <span><strong>Owner:</strong> {owner}</span>
               </div>
-              {contributors.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  <span className="text-xs text-muted-foreground mr-1">Contribuidores:</span>
-                  {contributors.map((c) => (
-                    <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
-                  ))}
+              {(contributors.length > 0 || externalContributors.length > 0) && (
+                <div className="space-y-1.5">
+                  {contributors.length > 0 && (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <span className="text-xs text-muted-foreground mr-1">Contribuidores:</span>
+                      {contributors.map((c) => (
+                        <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {externalContributors.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Externos:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {externalContributors.map((c) => (
+                          <Badge key={c.name} variant="secondary" className="text-xs gap-1.5">
+                            <span className="font-medium">{c.name}</span>
+                            {c.email && <span className="opacity-80">· {c.email}</span>}
+                            {c.phone && <span className="opacity-80">· {c.phone}</span>}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
