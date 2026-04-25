@@ -1,18 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/StatusBadge";
 import { objectives as defaultObjectives } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
-import { ChevronDown, ChevronRight, Target } from "lucide-react";
+import { activeTenant } from "@/data/tenant";
+import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
+import EditOKRDialog from "@/components/EditOKRDialog";
 
 const OKRsPage = () => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
   const [allObjectives, setAllObjectives] = useState<Objective[]>(defaultObjectives);
+  const [editing, setEditing] = useState<Objective | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+
+  // Current user is the tenant's admin (no auth layer in demo). Only admins can edit.
+  const currentUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
+  const isAdmin = currentUser?.role === "admin";
 
   const handleCreateOKR = (newObj: Objective) => {
     setAllObjectives((prev) => [newObj, ...prev]);
+  };
+
+  const handleSaveEdit = (updated: Objective) => {
+    setAllObjectives((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+    setEditing(null);
+  };
+
+  const openEdit = (obj: Objective) => {
+    setEditing(obj);
+    setEditOpen(true);
   };
 
   const toggle = (id: string) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -30,34 +49,52 @@ const OKRsPage = () => {
       <div className="space-y-4">
         {allObjectives.map((obj) => (
           <Card key={obj.id} className="glass-card overflow-hidden">
-            <button
-              onClick={() => toggle(obj.id)}
-              className="w-full p-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
-            >
-              {expanded[obj.id] ? (
-                <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
-              ) : (
-                <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-              )}
-              <Target className="w-5 h-5 text-primary shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-sm font-semibold text-foreground truncate">{obj.title}</h3>
-                  <StatusBadge status={obj.status} />
+            <div className="w-full p-5 flex items-center gap-4 hover:bg-muted/30 transition-colors">
+              <button
+                onClick={() => toggle(obj.id)}
+                className="flex items-center gap-4 flex-1 min-w-0 text-left"
+                aria-label={expanded[obj.id] ? "Contraer" : "Expandir"}
+              >
+                {expanded[obj.id] ? (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+                )}
+                <Target className="w-5 h-5 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-sm font-semibold text-foreground truncate">{obj.title}</h3>
+                    <StatusBadge status={obj.status} />
+                  </div>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="text-xs text-muted-foreground">{obj.area}</span>
+                    <span className="text-xs text-muted-foreground">•</span>
+                    <span className="text-xs text-muted-foreground">{obj.owner}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-xs text-muted-foreground">{obj.area}</span>
-                  <span className="text-xs text-muted-foreground">•</span>
-                  <span className="text-xs text-muted-foreground">{obj.owner}</span>
-                </div>
-              </div>
+              </button>
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-24">
                   <Progress value={obj.progress} className="h-2" />
                 </div>
                 <span className="text-sm font-bold text-foreground w-10 text-right">{obj.progress}%</span>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(obj);
+                    }}
+                    aria-label="Editar OKR"
+                    title="Editar OKR"
+                    className="h-8 w-8"
+                  >
+                    <Pencil className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                )}
               </div>
-            </button>
+            </div>
 
             {expanded[obj.id] && (
               <CardContent className="px-5 pb-5 pt-0 border-t border-border/50">
@@ -79,11 +116,33 @@ const OKRsPage = () => {
                     </div>
                   ))}
                 </div>
+                {isAdmin && (
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit(obj)}
+                      className="gap-2"
+                    >
+                      <Pencil className="w-3.5 h-3.5" /> Editar OKR y KRs
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>
         ))}
       </div>
+
+      <EditOKRDialog
+        objective={editing}
+        open={editOpen}
+        onOpenChange={(v) => {
+          setEditOpen(v);
+          if (!v) setEditing(null);
+        }}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
