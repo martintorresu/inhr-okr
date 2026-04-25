@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Target } from "lucide-react";
-import { activeTenant, activeTenantId } from "@/data/tenant";
+import { activeTenant } from "@/data/tenant";
 import inhrLogo from "@/assets/inhr-logo.png";
 
 interface LoginPageProps {
@@ -55,9 +55,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
         <div className="flex flex-col items-center gap-3">
           {activeTenant.logo ? (
             <div
-              className={`${
-                activeTenantId === "inovahr" ? "w-32 h-32" : "w-16 h-16"
-              } rounded-2xl bg-white border border-border flex items-center justify-center overflow-hidden`}
+              className="w-32 h-32 rounded-2xl bg-white border border-border flex items-center justify-center overflow-hidden"
             >
               <img src={activeTenant.logo} alt={activeTenant.company_name} className="w-full h-full object-contain" />
             </div>
