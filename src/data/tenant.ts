@@ -11,6 +11,9 @@ const detectTenantId = (): string => {
   const host = window.location.hostname;
   const qs = new URLSearchParams(window.location.search).get("tenant");
   if (qs) return qs;
+  // Demo tenant (Quimetal dataset) — new canonical domain.
+  if (host.includes("okr-demo")) return "quimetal";
+  // Legacy domain for the demo tenant — kept for backwards compatibility.
   if (host.includes("okr-quimetal")) return "quimetal";
   // okr-inhr.inovahr-app.com is the InovaHR tenant app (not to be confused with the "inhr" demo tenant).
   if (host.includes("okr-inhr.inovahr-app.com")) return "inovahr";
