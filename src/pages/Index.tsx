@@ -20,6 +20,19 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState("dashboard");
   // Centralized OKR state — survives navigation between pages.
   const [objectives, setObjectives] = useState<Objective[]>(defaultObjectives);
+  const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
+
+  // Hydrate session from Supabase for real-auth tenants.
+  useEffect(() => {
+    if (isDemoTenant) return;
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsLoggedIn(!!session);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setIsLoggedIn(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [isDemoTenant]);
 
   const renderPage = () => {
     switch (currentPage) {
