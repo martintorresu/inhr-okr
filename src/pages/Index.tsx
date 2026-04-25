@@ -7,7 +7,7 @@ import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
 import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
-import AlertsPage from "@/components/AlertsPage";
+import AlertsPage, { computeAlerts } from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
 import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
@@ -32,7 +32,10 @@ import {
   upsertCheckIn,
   deleteCheckIn,
   seedCheckInsFromMocks,
+  loadTenantSchedules,
+  upsertSchedule,
   type CheckInRecord,
+  type CheckInSchedule,
 } from "@/lib/checkInsPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
@@ -45,6 +48,7 @@ const Index = () => {
   const [initiatives, setInitiatives] = useState<InitiativeWithContext[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [checkIns, setCheckIns] = useState<CheckInRecord[]>([]);
+  const [schedules, setSchedules] = useState<CheckInSchedule[]>([]);
   const [currentUser, setCurrentUser] = useState<{ id: string | null; name: string }>({ id: null, name: "Yo" });
   const [isAdmin, setIsAdmin] = useState(false);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
@@ -114,6 +118,10 @@ const Index = () => {
           const seededCI = await seedCheckInsFromMocks(activeTenantId, defaultCheckIns);
           if (!cancelled) setCheckIns(seededCI);
         }
+
+        // Schedules
+        const storedSchedules = await loadTenantSchedules(activeTenantId);
+        if (!cancelled) setSchedules(storedSchedules);
 
         // Resolve current user + admin role.
         if (isDemoTenant) {
@@ -208,6 +216,15 @@ const Index = () => {
     setCheckIns((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const handleScheduleUpsert = async (s: CheckInSchedule) => {
+    await upsertSchedule(activeTenantId, s);
+    setSchedules((prev) => {
+      const idx = prev.findIndex((p) => p.objectiveId === s.objectiveId);
+      if (idx === -1) return [...prev, s];
+      const next = [...prev]; next[idx] = s; return next;
+    });
+  };
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
@@ -240,12 +257,22 @@ const Index = () => {
             currentUserId={currentUser.id}
             onUpsert={handleCheckInUpsert}
             onDelete={handleCheckInDelete}
+            schedules={schedules}
+            onScheduleUpsert={handleScheduleUpsert}
           />
         );
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
-        return <AlertsPage />;
+        return (
+          <AlertsPage
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+            onNavigate={setCurrentPage}
+          />
+        );
       default:
         return <DashboardPage objectives={objectives} initiatives={initiatives} />;
     }
@@ -274,6 +301,10 @@ const Index = () => {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
 
+  const alertsCount = loadedObjectives
+    ? computeAlerts(objectives, initiatives, checkIns, schedules).length
+    : 0;
+
   return (
     <div className="flex min-h-screen bg-background">
       <AppSidebar
@@ -282,6 +313,7 @@ const Index = () => {
         onLoadDemo={handleLoadDemo}
         onResetDemo={handleResetDemo}
         onLogout={handleLogout}
+        alertsCount={alertsCount}
       />
       <main className="flex-1 p-8 overflow-auto">
         {renderPage()}
