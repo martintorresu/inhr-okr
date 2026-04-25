@@ -229,7 +229,19 @@ const Index = () => {
           />
         );
       case "checkins":
-        return <CheckInsPage />;
+        return (
+          <CheckInsPage
+            objectives={objectives}
+            initiatives={initiatives}
+            team={team}
+            checkIns={checkIns}
+            isAdmin={isAdmin}
+            currentUserName={currentUser.name}
+            currentUserId={currentUser.id}
+            onUpsert={handleCheckInUpsert}
+            onDelete={handleCheckInDelete}
+          />
+        );
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
