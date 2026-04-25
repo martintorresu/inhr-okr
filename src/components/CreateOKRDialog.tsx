@@ -93,12 +93,54 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
     );
   };
 
+  const addExternalContributor = () => {
+    const name = extName.trim();
+    const email = extEmail.trim();
+    const phone = extPhone.trim();
+    if (!name) {
+      toast.error("El nombre del contribuidor externo es obligatorio");
+      return;
+    }
+    if (name.length > 100) {
+      toast.error("El nombre no debe superar 100 caracteres");
+      return;
+    }
+    if (email && !emailRegex.test(email)) {
+      toast.error("Email inválido");
+      return;
+    }
+    if (phone && !phoneRegex.test(phone)) {
+      toast.error("Teléfono inválido");
+      return;
+    }
+    if (
+      externalContributors.some((c) => c.name.toLowerCase() === name.toLowerCase()) ||
+      contributors.some((c) => c.toLowerCase() === name.toLowerCase())
+    ) {
+      toast.error("Ese contribuidor ya fue agregado");
+      return;
+    }
+    setExternalContributors([...externalContributors, { name, email, phone }]);
+    setExtName("");
+    setExtEmail("");
+    setExtPhone("");
+    toast.success("Contribuidor externo agregado");
+  };
+
+  const removeExternalContributor = (name: string) => {
+    setExternalContributors(externalContributors.filter((c) => c.name !== name));
+  };
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setArea("");
     setOwner("");
     setContributors([]);
+    setExternalContributors([]);
+    setExtName("");
+    setExtEmail("");
+    setExtPhone("");
     setCycle("");
     setLevel("area");
     setKeyResults([emptyKR()]);
