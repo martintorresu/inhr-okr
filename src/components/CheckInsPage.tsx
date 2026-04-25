@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/table";
 import {
   AlertTriangle, ArrowDown, ArrowRight, ArrowUp, MessageSquare,
-  Plus, Trash2, Pencil, ShieldCheck,
+  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
 } from "lucide-react";
+import CheckInTimeline from "@/components/CheckInTimeline";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
