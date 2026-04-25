@@ -22,6 +22,7 @@ import type { TeamMember } from "@/lib/teamPersistence";
 import {
   type CheckInRecord, type Confidence, type Trend, type BlockerEntry,
   type CommitmentEntry, type InitiativeSnapshot,
+  type CheckInSchedule, type Frequency,
 } from "@/lib/checkInsPersistence";
 
 interface CheckInsPageProps {
@@ -34,6 +35,8 @@ interface CheckInsPageProps {
   currentUserId?: string | null;
   onUpsert: (ci: CheckInRecord) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  schedules: CheckInSchedule[];
+  onScheduleUpsert: (s: CheckInSchedule) => Promise<void>;
 }
 
 const confidenceMeta: Record<Confidence, { label: string; cls: string }> = {
