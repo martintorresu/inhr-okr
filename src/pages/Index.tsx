@@ -1,5 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { activeTenantId } from "@/data/tenant";
+
+const DEMO_TENANTS = new Set<string>(["quimetal"]);
 import DashboardPage from "@/components/DashboardPage";
 import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
