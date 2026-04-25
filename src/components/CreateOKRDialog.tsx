@@ -66,6 +66,10 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
   const [cycle, setCycle] = useState("");
   const [level, setLevel] = useState<"company" | "area" | "project">("area");
   const [keyResults, setKeyResults] = useState<KRDraft[]>([emptyKR()]);
+  const [externalContributors, setExternalContributors] = useState<ExternalContributor[]>([]);
+  const [extName, setExtName] = useState("");
+  const [extEmail, setExtEmail] = useState("");
+  const [extPhone, setExtPhone] = useState("");
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
