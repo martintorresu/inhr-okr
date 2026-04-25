@@ -192,7 +192,7 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
       progress: 0,
       status: "draft",
       quarter: cycle,
-      contributors,
+      contributors: [...contributors, ...externalContributors.map((c) => c.name)],
       keyResults: validKRs.map((kr, i) => ({
         id: `kr_${Date.now()}_${i}`,
         title: kr.title.trim(),
