@@ -31,7 +31,7 @@ const navItems = [
   { id: "alerts", label: "Alertas", icon: AlertTriangle },
 ];
 
-const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout }: AppSidebarProps) => {
+const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
   return (
     <aside className="w-64 min-h-screen bg-sidebar flex flex-col">
       {/* Logo */}
