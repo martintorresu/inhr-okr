@@ -9,7 +9,7 @@ import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
 import AlertsPage from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
-import { objectives as defaultObjectives, users as defaultUsers } from "@/data/mockData";
+import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
 import { loadTenantObjectives, replaceTenantObjectives } from "@/lib/okrPersistence";
@@ -27,6 +27,13 @@ import {
   seedTeamFromMocks,
   type TeamMember,
 } from "@/lib/teamPersistence";
+import {
+  loadTenantCheckIns,
+  upsertCheckIn,
+  deleteCheckIn,
+  seedCheckInsFromMocks,
+  type CheckInRecord,
+} from "@/lib/checkInsPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
 
