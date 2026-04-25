@@ -301,6 +301,10 @@ const Index = () => {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
 
+  const alertsCount = loadedObjectives
+    ? computeAlerts(objectives, initiatives, checkIns, schedules).length
+    : 0;
+
   return (
     <div className="flex min-h-screen bg-background">
       <AppSidebar
@@ -309,6 +313,7 @@ const Index = () => {
         onLoadDemo={handleLoadDemo}
         onResetDemo={handleResetDemo}
         onLogout={handleLogout}
+        alertsCount={alertsCount}
       />
       <main className="flex-1 p-8 overflow-auto">
         {renderPage()}
