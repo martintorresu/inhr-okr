@@ -83,34 +83,44 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-[linear-gradient(180deg,hsl(220_15%_94%)_0%,hsl(25_25%_94%)_100%)]">
-      {/* Large blue sphere — top */}
+    <div
+      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #1E4BFF 0%, #5DB6FF 28%, #C47CFF 55%, #FF5FA3 80%, #FF8A7A 100%)",
+      }}
+    >
+      {/* Large blue sphere — top left */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-[28%] left-1/2 -translate-x-[55%] w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full blur-2xl opacity-90"
+        className="pointer-events-none absolute -top-[25%] -left-[15%] w-[85vw] h-[85vw] max-w-[1000px] max-h-[1000px] rounded-full blur-2xl opacity-95"
         style={{
           background:
-            "radial-gradient(circle at 35% 35%, hsl(220 90% 62%) 0%, hsl(220 80% 45%) 45%, hsl(220 60% 30% / 0.85) 75%, transparent 100%)",
+            "radial-gradient(circle at 38% 38%, #1E4BFF 0%, #2E5FFF 40%, #5DB6FF 70%, transparent 100%)",
         }}
       />
-      {/* Large orange/coral sphere — bottom */}
+      {/* Large pink/peach sphere — bottom right */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-[30%] left-1/2 -translate-x-[35%] w-[85vw] h-[85vw] max-w-[950px] max-h-[950px] rounded-full blur-2xl opacity-90"
+        className="pointer-events-none absolute -bottom-[28%] -right-[18%] w-[90vw] h-[90vw] max-w-[1050px] max-h-[1050px] rounded-full blur-2xl opacity-95"
         style={{
           background:
-            "radial-gradient(circle at 40% 40%, hsl(18 95% 68%) 0%, hsl(15 90% 60%) 40%, hsl(340 80% 55% / 0.85) 75%, transparent 100%)",
+            "radial-gradient(circle at 40% 40%, #FF5FA3 0%, #FF6E8E 45%, #FF8A7A 75%, transparent 100%)",
         }}
       />
-      {/* Subtle grey accent for depth */}
+      {/* Soft lila glow to bridge the two spheres */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 -left-32 w-[28rem] h-[28rem] rounded-full bg-[hsl(220_10%_60%/0.18)] blur-3xl"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full blur-3xl opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle, #C47CFF 0%, #C47CFF55 50%, transparent 100%)",
+        }}
       />
       {/* Soft white veil to lift card readability */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_100%/0.35)_0%,transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_100%/0.25)_0%,transparent_65%)]"
       />
 
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
