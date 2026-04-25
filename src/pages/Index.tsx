@@ -32,7 +32,10 @@ import {
   upsertCheckIn,
   deleteCheckIn,
   seedCheckInsFromMocks,
+  loadTenantSchedules,
+  upsertSchedule,
   type CheckInRecord,
+  type CheckInSchedule,
 } from "@/lib/checkInsPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
