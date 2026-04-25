@@ -8,7 +8,8 @@ import {
   areas,
 } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
-import { Target, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
+import { Target, TrendingUp, AlertTriangle, CheckCircle2, Rocket, Clock, CalendarClock, UserX } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const getBarColor = (progress: number) => {
@@ -19,15 +20,27 @@ const getBarColor = (progress: number) => {
 
 interface DashboardPageProps {
   objectives?: Objective[];
+  initiatives?: InitiativeWithContext[];
 }
 
-const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = {}) => {
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const inDaysISO = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+const startOfQuarterISO = () => {
+  const d = new Date();
+  const qStartMonth = Math.floor(d.getMonth() / 3) * 3;
+  return new Date(d.getFullYear(), qStartMonth, 1).toISOString().slice(0, 10);
+};
+
+const DashboardPage = ({ objectives = defaultObjectives, initiatives = [] }: DashboardPageProps = {}) => {
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
 
-  // Derive per-area & global progress from the live objectives list so the
-  // dashboard reflects OKRs created/edited at runtime.
   const areaProgress = areas.map((area) => {
     const areaObjs = objectives.filter((o) => o.area === area);
     const avg = areaObjs.length > 0
@@ -39,11 +52,44 @@ const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = 
     ? Math.round(objectives.reduce((s, o) => s + o.progress, 0) / objectives.length)
     : 0;
 
+  // Initiative KPIs
+  const today = todayISO();
+  const in7 = inDaysISO(7);
+  const qStart = startOfQuarterISO();
+
+  const activeInis = initiatives.filter((i) => i.status !== "completed");
+  const overdueInis = initiatives.filter(
+    (i) => i.status !== "completed" && i.endDate && i.endDate < today
+  );
+  const dueSoonInis = initiatives.filter(
+    (i) => i.status !== "completed" && i.endDate && i.endDate >= today && i.endDate <= in7
+  );
+  const completedThisQuarter = initiatives.filter(
+    (i) => i.status === "completed" && i.endDate && i.endDate >= qStart
+  );
+
+  // Atrasadas agrupadas por responsable
+  const overdueByResponsible = overdueInis.reduce<Record<string, number>>((acc, i) => {
+    const key = i.responsible || "Sin asignar";
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
+  const overdueByResponsibleList = Object.entries(overdueByResponsible)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
   const kpiCards = [
     { title: "Cumplimiento Global", value: `${globalProgress}%`, icon: Target, color: "text-primary" },
     { title: "OKRs en Curso", value: `${onTrack}`, icon: TrendingUp, color: "text-success" },
     { title: "OKRs en Riesgo", value: `${atRisk}`, icon: AlertTriangle, color: "text-warning" },
     { title: "Key Results", value: `${totalKRs}`, icon: CheckCircle2, color: "text-info" },
+  ];
+
+  const initiativeKpis = [
+    { title: "Iniciativas activas", value: `${activeInis.length}`, icon: Rocket, color: "text-primary" },
+    { title: "Atrasadas", value: `${overdueInis.length}`, icon: Clock, color: "text-danger" },
+    { title: "Vencen en ≤7 días", value: `${dueSoonInis.length}`, icon: CalendarClock, color: "text-warning" },
+    { title: "Completadas este trim.", value: `${completedThisQuarter.length}`, icon: CheckCircle2, color: "text-success" },
   ];
 
   return (
@@ -70,8 +116,30 @@ const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = 
         ))}
       </div>
 
+      {/* Initiative KPI Cards */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+          <Rocket className="w-4 h-4 text-primary" /> Iniciativas
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {initiativeKpis.map((kpi) => (
+            <Card key={kpi.title} className="glass-card">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{kpi.title}</p>
+                    <p className="text-3xl font-bold text-foreground mt-1">{kpi.value}</p>
+                  </div>
+                  <kpi.icon className={`w-10 h-10 ${kpi.color} opacity-70`} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Progress Ring + Area chart */}
+        {/* Cumplimiento por Área */}
         <Card className="glass-card lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">Cumplimiento por Área</CardTitle>
@@ -113,7 +181,7 @@ const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = 
         </Card>
       </div>
 
-      {/* OKR Heatmap + Alerts */}
+      {/* Heatmap + Atrasadas por responsable */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="glass-card">
           <CardHeader>
@@ -135,26 +203,44 @@ const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = 
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-warning" />
-              Alertas Activas
+              <UserX className="w-4 h-4 text-danger" />
+              Iniciativas atrasadas por responsable
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {alerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
-              >
-                <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${alert.severity === "high" ? "bg-danger" : "bg-warning"}`} />
-                <div>
-                  <p className="text-sm font-medium text-foreground">{alert.message}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{alert.date}</p>
-                </div>
+          <CardContent className="space-y-2">
+            {overdueByResponsibleList.length === 0 && (
+              <p className="text-sm text-muted-foreground">Sin iniciativas atrasadas. 🎉</p>
+            )}
+            {overdueByResponsibleList.map(([name, count]) => (
+              <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm font-medium text-foreground">{name}</span>
+                <span className="text-sm font-semibold text-danger">{count} atrasada{count > 1 ? "s" : ""}</span>
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
+
+      {/* Alertas */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            Alertas Activas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {alerts.map((alert) => (
+            <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+              <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${alert.severity === "high" ? "bg-danger" : "bg-warning"}`} />
+              <div>
+                <p className="text-sm font-medium text-foreground">{alert.message}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{alert.date}</p>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 };
