@@ -59,7 +59,7 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
   const [keyResults, setKeyResults] = useState<KRDraft[]>([emptyKR()]);
 
   const addKR = () => {
-    if (keyResults.length >= 5) return;
+    if (keyResults.length >= 8) return;
     setKeyResults([...keyResults, emptyKR()]);
   };
 
@@ -275,11 +275,11 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Sección 2: Key Results</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addKR} disabled={keyResults.length >= 5} className="gap-1">
+                <Button type="button" variant="outline" size="sm" onClick={addKR} disabled={keyResults.length >= 8} className="gap-1">
                   <Plus className="w-3 h-3" /> Agregar KR
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">Define resultados clave medibles (mín. 1, máx. 5). Los pesos deben sumar 100% si se asignan.</p>
+              <p className="text-xs text-muted-foreground">Define resultados clave medibles (mín. 1, máx. 8). Los pesos deben sumar 100% si se asignan.</p>
 
               <div className="space-y-3">
                 {keyResults.map((kr, idx) => (
