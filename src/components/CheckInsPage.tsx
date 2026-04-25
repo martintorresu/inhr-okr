@@ -96,7 +96,7 @@ const emptyDraft = (objectiveId: string, authorName: string, authorUserId?: stri
 
 const CheckInsPage = ({
   objectives, initiatives, team, checkIns, isAdmin, currentUserName, currentUserId,
-  onUpsert, onDelete,
+  onUpsert, onDelete, schedules, onScheduleUpsert,
 }: CheckInsPageProps) => {
   const [tab, setTab] = useState<"individual" | "admin">("individual");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
