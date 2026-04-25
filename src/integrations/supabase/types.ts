@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      okr_checkin_schedules: {
+        Row: {
+          created_at: string
+          frequency: string
+          id: string
+          last_generated_at: string | null
+          next_due_date: string | null
+          objective_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          frequency?: string
+          id: string
+          last_generated_at?: string | null
+          next_due_date?: string | null
+          objective_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          frequency?: string
+          id?: string
+          last_generated_at?: string | null
+          next_due_date?: string | null
+          objective_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      okr_checkins: {
+        Row: {
+          author_name: string
+          author_user_id: string | null
+          blockers: Json
+          checkin_date: string
+          comment: string
+          confidence: string
+          created_at: string
+          id: string
+          initiative_snapshots: Json
+          insight: string
+          kr_id: string | null
+          leader_comment: string
+          next_commitments: Json
+          objective_id: string
+          progress_auto: number
+          progress_manual: number
+          score_auto: number
+          score_manual: number | null
+          status: string
+          tenant_id: string
+          trend: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          author_user_id?: string | null
+          blockers?: Json
+          checkin_date?: string
+          comment?: string
+          confidence?: string
+          created_at?: string
+          id: string
+          initiative_snapshots?: Json
+          insight?: string
+          kr_id?: string | null
+          leader_comment?: string
+          next_commitments?: Json
+          objective_id: string
+          progress_auto?: number
+          progress_manual?: number
+          score_auto?: number
+          score_manual?: number | null
+          status?: string
+          tenant_id: string
+          trend?: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          author_user_id?: string | null
+          blockers?: Json
+          checkin_date?: string
+          comment?: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          initiative_snapshots?: Json
+          insight?: string
+          kr_id?: string | null
+          leader_comment?: string
+          next_commitments?: Json
+          objective_id?: string
+          progress_auto?: number
+          progress_manual?: number
+          score_auto?: number
+          score_manual?: number | null
+          status?: string
+          tenant_id?: string
+          trend?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       okr_initiatives: {
         Row: {
           created_at: string
@@ -155,15 +263,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _tenant_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_tenant_admin: { Args: { _tenant_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -290,6 +430,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "member"],
+    },
   },
 } as const
