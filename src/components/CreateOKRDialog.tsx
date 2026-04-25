@@ -310,19 +310,87 @@ const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
             </div>
 
             {/* Contributors */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Contribuidores (opcional)</Label>
-              <div className="flex flex-wrap gap-2">
-                {users.filter((u) => u.name !== owner).map((u) => (
-                  <Badge
-                    key={u.id}
-                    variant={contributors.includes(u.name) ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => toggleContributor(u.name)}
-                  >
-                    {u.name}
-                  </Badge>
-                ))}
+
+              {/* Internos */}
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Internos del equipo</p>
+                <div className="flex flex-wrap gap-2">
+                  {users.filter((u) => u.name !== owner).map((u) => (
+                    <Badge
+                      key={u.id}
+                      variant={contributors.includes(u.name) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => toggleContributor(u.name)}
+                    >
+                      {u.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Externos */}
+              <div className="space-y-2 p-3 rounded-lg border border-border/50 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-medium text-foreground">Agregar contribuidor externo (consultor, amigo, referido)</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <Input
+                    placeholder="Nombre *"
+                    value={extName}
+                    onChange={(e) => setExtName(e.target.value)}
+                    maxLength={100}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={extEmail}
+                    onChange={(e) => setExtEmail(e.target.value)}
+                    maxLength={255}
+                  />
+                  <Input
+                    type="tel"
+                    placeholder="Teléfono"
+                    value={extPhone}
+                    onChange={(e) => setExtPhone(e.target.value)}
+                    maxLength={20}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button type="button" variant="outline" size="sm" onClick={addExternalContributor} className="gap-1">
+                    <Plus className="w-3 h-3" /> Agregar
+                  </Button>
+                </div>
+
+                {externalContributors.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {externalContributors.map((c) => (
+                      <Badge key={c.name} variant="default" className="gap-1.5 pr-1 py-1">
+                        <span>{c.name}</span>
+                        {c.email && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] opacity-80">
+                            <Mail className="w-2.5 h-2.5" />{c.email}
+                          </span>
+                        )}
+                        {c.phone && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] opacity-80">
+                            <Phone className="w-2.5 h-2.5" />{c.phone}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExternalContributor(c.name)}
+                          className="ml-1 rounded-sm hover:bg-background/20 p-0.5"
+                          aria-label={`Eliminar ${c.name}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
