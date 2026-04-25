@@ -65,7 +65,7 @@ const Index = () => {
         onLogout={handleLogout}
       />
       <main className="flex-1 p-8 overflow-auto">
-        <PageComponent />
+        {renderPage()}
       </main>
     </div>
   );
