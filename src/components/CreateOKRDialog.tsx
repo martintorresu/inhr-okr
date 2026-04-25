@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Info, Eye, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Info, Eye, ArrowLeft, UserPlus, X, Mail, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { areas, users } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
@@ -19,6 +19,15 @@ interface KRDraft {
   direction: "higher_is_better" | "lower_is_better";
   weight: string;
 }
+
+interface ExternalContributor {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[+0-9\s()-]{6,20}$/;
 
 interface CreateOKRDialogProps {
   onCreateOKR: (objective: Objective) => void;
