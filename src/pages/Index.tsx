@@ -7,22 +7,34 @@ import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
 import AlertsPage from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
+import { objectives as defaultObjectives } from "@/data/mockData";
+import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
-
-const pages: Record<string, React.FC> = {
-  dashboard: DashboardPage,
-  okrs: OKRsPage,
-  initiatives: InitiativesPage,
-  checkins: CheckInsPage,
-  team: TeamPage,
-  alerts: AlertsPage,
-};
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
+  // Centralized OKR state — survives navigation between pages.
+  const [objectives, setObjectives] = useState<Objective[]>(defaultObjectives);
 
-  const PageComponent = pages[currentPage] || DashboardPage;
+  const renderPage = () => {
+    switch (currentPage) {
+      case "okrs":
+        return <OKRsPage objectives={objectives} setObjectives={setObjectives} />;
+      case "dashboard":
+        return <DashboardPage objectives={objectives} />;
+      case "initiatives":
+        return <InitiativesPage />;
+      case "checkins":
+        return <CheckInsPage />;
+      case "team":
+        return <TeamPage />;
+      case "alerts":
+        return <AlertsPage />;
+      default:
+        return <DashboardPage objectives={objectives} />;
+    }
+  };
 
   const handleLoadDemo = () => {
     toast.success("Entorno demo cargado", { description: "Datos mock de empresa pequeña (10 usuarios, 5 OKRs)" });
