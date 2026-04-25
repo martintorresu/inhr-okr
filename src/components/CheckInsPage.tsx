@@ -665,4 +665,84 @@ const CheckInEditor = ({
   );
 };
 
+
+const SchedulesPanel = ({
+  objectives, schedules, onUpsert,
+}: {
+  objectives: Objective[];
+  schedules: CheckInSchedule[];
+  onUpsert: (s: CheckInSchedule) => Promise<void>;
+}) => {
+  const byObj = useMemo(
+    () => Object.fromEntries(schedules.map((s) => [s.objectiveId, s])),
+    [schedules]
+  );
+
+  const update = async (objId: string, frequency: Frequency) => {
+    const existing = byObj[objId];
+    const days = frequency === "weekly" ? 7 : frequency === "monthly" ? 30 : 14;
+    const next: CheckInSchedule = {
+      id: existing?.id ?? `sch-${objId}`,
+      objectiveId: objId,
+      frequency,
+      nextDueDate: existing?.nextDueDate ?? new Date(Date.now() + days * 86400000).toISOString().slice(0, 10),
+      lastGeneratedAt: existing?.lastGeneratedAt ?? null,
+    };
+    try {
+      await onUpsert(next);
+      toast.success("Frecuencia actualizada");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo guardar");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Frecuencia de check-ins por OKR</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>OKR</TableHead>
+              <TableHead className="w-40">Frecuencia</TableHead>
+              <TableHead className="text-right">Próximo</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {objectives.map((o) => {
+              const s = byObj[o.id];
+              return (
+                <TableRow key={o.id}>
+                  <TableCell className="text-sm">
+                    <div className="font-medium truncate max-w-[320px]">{o.title}</div>
+                    <div className="text-xs text-muted-foreground">{o.area}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={s?.frequency ?? "biweekly"}
+                      onValueChange={(v) => update(o.id, v as Frequency)}
+                    >
+                      <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Semanal</SelectItem>
+                        <SelectItem value="biweekly">Quincenal</SelectItem>
+                        <SelectItem value="monthly">Mensual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-right text-xs text-muted-foreground">
+                    {s?.nextDueDate ?? "—"}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default CheckInsPage;
