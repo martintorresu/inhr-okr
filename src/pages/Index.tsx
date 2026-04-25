@@ -1,5 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { activeTenantId } from "@/data/tenant";
+
+const DEMO_TENANTS = new Set<string>(["quimetal"]);
 import DashboardPage from "@/components/DashboardPage";
 import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
@@ -16,6 +20,19 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState("dashboard");
   // Centralized OKR state — survives navigation between pages.
   const [objectives, setObjectives] = useState<Objective[]>(defaultObjectives);
+  const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
+
+  // Hydrate session from Supabase for real-auth tenants.
+  useEffect(() => {
+    if (isDemoTenant) return;
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsLoggedIn(!!session);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setIsLoggedIn(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [isDemoTenant]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -45,7 +62,10 @@ const Index = () => {
     toast.info("Demo reiniciado", { description: "Todos los datos fueron restablecidos" });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (!isDemoTenant) {
+      await supabase.auth.signOut();
+    }
     setIsLoggedIn(false);
     setCurrentPage("dashboard");
     toast.info("Sesión cerrada");
