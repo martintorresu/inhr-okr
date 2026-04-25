@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +73,9 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
   const [level, setLevel] = useState<"company" | "area" | "project">("area");
   const [status, setStatus] = useState<Objective["status"]>("draft");
   const [keyResults, setKeyResults] = useState<KRDraft[]>([emptyKR()]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
+  const [changeSummary, setChangeSummary] = useState<string[]>([]);
 
   useEffect(() => {
     if (objective && open) {
@@ -115,6 +128,48 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
         ? ((init - current) / (init - target)) * 100
         : ((current - init) / (target - init)) * 100;
     return Math.max(0, Math.min(100, Math.round(raw)));
+  };
+
+  const buildSummary = (updated: Objective): string[] => {
+    if (!objective) return [];
+    const diffs: string[] = [];
+    if (objective.title !== updated.title) diffs.push("Título");
+    if ((objective.description ?? "") !== updated.description) diffs.push("Descripción");
+    if (objective.area !== updated.area) diffs.push(`Área: ${objective.area} → ${updated.area}`);
+    if (objective.owner !== updated.owner) diffs.push(`Responsable: ${objective.owner} → ${updated.owner}`);
+    if (objective.quarter !== updated.quarter) diffs.push(`Ciclo: ${objective.quarter} → ${updated.quarter}`);
+    if (objective.level !== updated.level) diffs.push(`Nivel: ${objective.level} → ${updated.level}`);
+    if (objective.status !== updated.status) diffs.push(`Estado: ${objective.status} → ${updated.status}`);
+
+    const oldContrib = (objective.contributors ?? []).join(",");
+    const newContrib = (updated.contributors ?? []).join(",");
+    if (oldContrib !== newContrib) diffs.push("Contribuidores");
+
+    const oldIds = new Set(objective.keyResults.map((k) => k.id));
+    const newIds = new Set(updated.keyResults.map((k) => k.id));
+    const added = updated.keyResults.filter((k) => !oldIds.has(k.id)).length;
+    const removed = objective.keyResults.filter((k) => !newIds.has(k.id)).length;
+    const modified = updated.keyResults.filter((k) => {
+      const orig = objective.keyResults.find((o) => o.id === k.id);
+      if (!orig) return false;
+      return (
+        orig.title !== k.title ||
+        orig.target !== k.target ||
+        orig.current !== k.current ||
+        orig.initialValue !== k.initialValue ||
+        orig.direction !== k.direction ||
+        orig.weight !== k.weight ||
+        orig.type !== k.type
+      );
+    }).length;
+    if (added) diffs.push(`${added} KR agregado(s)`);
+    if (removed) diffs.push(`${removed} KR eliminado(s)`);
+    if (modified) diffs.push(`${modified} KR modificado(s)`);
+
+    if (objective.progress !== updated.progress) {
+      diffs.push(`Progreso: ${objective.progress}% → ${updated.progress}%`);
+    }
+    return diffs;
   };
 
   const handleSave = () => {
@@ -185,14 +240,31 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
       progress: objectiveProgress,
     };
 
-    onSave(updated);
+    const summary = buildSummary(updated);
+    if (summary.length === 0) {
+      toast.info("No se detectaron cambios");
+      return;
+    }
+
+    setPendingObjective(updated);
+    setChangeSummary(summary);
+    setConfirmOpen(true);
+  };
+
+  const confirmSave = () => {
+    if (!pendingObjective) return;
+    onSave(pendingObjective);
     toast.success("OKR actualizado exitosamente");
+    setConfirmOpen(false);
+    setPendingObjective(null);
+    setChangeSummary([]);
     onOpenChange(false);
   };
 
   if (!objective) return null;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -414,6 +486,35 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogP
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Confirmar cambios al OKR?</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2">
+              <p>
+                Vas a guardar las siguientes modificaciones en{" "}
+                <strong className="text-foreground">{objective?.title}</strong>:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-foreground">
+                {changeSummary.map((c, i) => (
+                  <li key={i}>{c}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground pt-2">
+                Esta acción actualizará el OKR para todos los usuarios. Podés cancelar para revisar los datos.
+              </p>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmSave}>Confirmar y guardar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
