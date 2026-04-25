@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/table";
 import {
   AlertTriangle, ArrowDown, ArrowRight, ArrowUp, MessageSquare,
-  Plus, Trash2, Pencil, ShieldCheck,
+  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
 } from "lucide-react";
+import CheckInTimeline from "@/components/CheckInTimeline";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
@@ -101,6 +102,7 @@ const CheckInsPage = ({
   const [tab, setTab] = useState<"individual" | "admin">("individual");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
+  const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
 
   const objectiveById = useMemo(() => Object.fromEntries(objectives.map((o) => [o.id, o])), [objectives]);
   const initiativesByKR = useMemo(() => {
@@ -293,11 +295,16 @@ const CheckInsPage = ({
                           {last ? `${last.checkinDate} · ${last.authorName}` : "Sin check-in"}
                         </TableCell>
                         <TableCell className="text-right">
-                          {last && (
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(last)}>
-                              <Pencil className="w-3.5 h-3.5" />
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" title="Ver evolución" onClick={() => setTimelineObj(obj)}>
+                              <LineChartIcon className="w-3.5 h-3.5" />
                             </Button>
-                          )}
+                            {last && (
+                              <Button variant="ghost" size="icon" title="Editar último check-in" onClick={() => openEdit(last)}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -349,6 +356,22 @@ const CheckInsPage = ({
         onClose={() => setEditor({ open: false, draft: null })}
         onSave={save}
       />
+
+      <Dialog open={!!timelineObj} onOpenChange={(o) => !o && setTimelineObj(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Evolución · {timelineObj?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {timelineObj && <CheckInTimeline checkIns={checkIns} objectiveId={timelineObj.id} />}
+          <div className="text-xs text-muted-foreground flex gap-4 pt-2">
+            <span><span className="inline-block w-3 h-0.5 bg-primary mr-1 align-middle" /> Progreso</span>
+            <span><span className="inline-block w-3 h-0.5 bg-success mr-1 align-middle" /> Score (×100)</span>
+            <span><span className="inline-block w-3 h-0.5 bg-warning mr-1 align-middle" /> Confianza</span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
