@@ -193,6 +193,21 @@ const Index = () => {
     setTeam((prev) => prev.filter((m) => m.id !== id));
   };
 
+  const handleCheckInUpsert = async (ci: CheckInRecord) => {
+    const enriched: CheckInRecord = { ...ci, authorUserId: ci.authorUserId ?? currentUser.id, authorName: ci.authorName || currentUser.name };
+    await upsertCheckIn(activeTenantId, enriched);
+    setCheckIns((prev) => {
+      const idx = prev.findIndex((c) => c.id === enriched.id);
+      if (idx === -1) return [enriched, ...prev];
+      const next = [...prev]; next[idx] = enriched; return next;
+    });
+  };
+
+  const handleCheckInDelete = async (id: string) => {
+    await deleteCheckIn(activeTenantId, id);
+    setCheckIns((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
