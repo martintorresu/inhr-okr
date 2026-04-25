@@ -120,7 +120,12 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
       {/* Soft white veil to lift card readability */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_100%/0.25)_0%,transparent_65%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_100%/0.45)_0%,hsl(0_0%_100%/0.15)_45%,transparent_75%)]"
+      />
+      {/* Subtle dark vignette for edge contrast on small screens */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(0_0%_0%/0.15)_100%)]"
       />
 
       <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
