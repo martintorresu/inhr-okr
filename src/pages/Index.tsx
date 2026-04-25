@@ -104,6 +104,34 @@ const Index = () => {
           const seededTeam = await seedTeamFromMocks(activeTenantId, defaultUsers);
           if (!cancelled) setTeam(seededTeam);
         }
+
+        // Check-ins: load from table, seed from mocks on first run.
+        const storedCheckIns = await loadTenantCheckIns(activeTenantId);
+        if (cancelled) return;
+        if (storedCheckIns.length) {
+          setCheckIns(storedCheckIns);
+        } else if (defaultCheckIns.length) {
+          const seededCI = await seedCheckInsFromMocks(activeTenantId, defaultCheckIns);
+          if (!cancelled) setCheckIns(seededCI);
+        }
+
+        // Resolve current user + admin role.
+        if (isDemoTenant) {
+          setCurrentUser({ id: null, name: "Administrador demo" });
+          setIsAdmin(true);
+        } else {
+          const { data: sessionData } = await supabase.auth.getSession();
+          const user = sessionData.session?.user;
+          if (user) {
+            const name = (user.user_metadata?.full_name as string)
+              || (user.user_metadata?.name as string)
+              || user.email
+              || "Usuario";
+            setCurrentUser({ id: user.id, name });
+            const { data: adminCheck } = await (supabase as any).rpc("is_tenant_admin", { _tenant_id: activeTenantId });
+            if (!cancelled) setIsAdmin(!!adminCheck);
+          }
+        }
       } catch (error) {
         const msg = error instanceof Error ? error.message : "No se pudieron cargar los datos";
         toast.error(msg);
