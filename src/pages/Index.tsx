@@ -119,6 +119,10 @@ const Index = () => {
           if (!cancelled) setCheckIns(seededCI);
         }
 
+        // Schedules
+        const storedSchedules = await loadTenantSchedules(activeTenantId);
+        if (!cancelled) setSchedules(storedSchedules);
+
         // Resolve current user + admin role.
         if (isDemoTenant) {
           setCurrentUser({ id: null, name: "Administrador demo" });
