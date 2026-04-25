@@ -314,6 +314,12 @@ const CheckInsPage = ({
             </CardContent>
           </Card>
 
+          <SchedulesPanel
+            objectives={objectives}
+            schedules={schedules}
+            onUpsert={onScheduleUpsert}
+          />
+
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Historial reciente</h3>
             {checkIns.slice(0, 10).map((ci) => (
