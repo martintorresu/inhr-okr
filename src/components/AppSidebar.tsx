@@ -19,6 +19,7 @@ interface AppSidebarProps {
   onLoadDemo: () => void;
   onResetDemo: () => void;
   onLogout: () => void;
+  alertsCount?: number;
 }
 
 const navItems = [
