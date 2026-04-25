@@ -216,6 +216,15 @@ const Index = () => {
     setCheckIns((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const handleScheduleUpsert = async (s: CheckInSchedule) => {
+    await upsertSchedule(activeTenantId, s);
+    setSchedules((prev) => {
+      const idx = prev.findIndex((p) => p.objectiveId === s.objectiveId);
+      if (idx === -1) return [...prev, s];
+      const next = [...prev]; next[idx] = s; return next;
+    });
+  };
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
