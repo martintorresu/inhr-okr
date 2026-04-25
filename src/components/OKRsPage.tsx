@@ -10,9 +10,18 @@ import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
 import EditOKRDialog from "@/components/EditOKRDialog";
 
-const OKRsPage = () => {
+interface OKRsPageProps {
+  objectives?: Objective[];
+  setObjectives?: React.Dispatch<React.SetStateAction<Objective[]>>;
+}
+
+const OKRsPage = ({ objectives, setObjectives }: OKRsPageProps = {}) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
-  const [allObjectives, setAllObjectives] = useState<Objective[]>(defaultObjectives);
+  // Fallback to internal state if parent doesn't provide controlled state.
+  const [internalObjectives, setInternalObjectives] = useState<Objective[]>(defaultObjectives);
+  const allObjectives = objectives ?? internalObjectives;
+  const updateObjectives: React.Dispatch<React.SetStateAction<Objective[]>> =
+    setObjectives ?? setInternalObjectives;
   const [editing, setEditing] = useState<Objective | null>(null);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -21,11 +30,11 @@ const OKRsPage = () => {
   const isAdmin = currentUser?.role === "admin";
 
   const handleCreateOKR = (newObj: Objective) => {
-    setAllObjectives((prev) => [newObj, ...prev]);
+    updateObjectives((prev) => [newObj, ...prev]);
   };
 
   const handleSaveEdit = (updated: Objective) => {
-    setAllObjectives((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+    updateObjectives((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
     setEditing(null);
   };
 
