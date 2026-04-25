@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      okr_initiatives: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          kr_id: string
+          objective_id: string | null
+          progress: number
+          responsible: string
+          start_date: string | null
+          status: string
+          tasks: Json
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id: string
+          kr_id: string
+          objective_id?: string | null
+          progress?: number
+          responsible: string
+          start_date?: string | null
+          status?: string
+          tasks?: Json
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          kr_id?: string
+          objective_id?: string | null
+          progress?: number
+          responsible?: string
+          start_date?: string | null
+          status?: string
+          tasks?: Json
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       okr_objectives: {
         Row: {
           area: string
