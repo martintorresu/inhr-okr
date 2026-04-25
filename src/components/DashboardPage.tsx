@@ -2,7 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import ProgressRing from "@/components/ProgressRing";
 import StatusBadge from "@/components/StatusBadge";
-import { objectives, alerts, areaProgress, globalProgress } from "@/data/mockData";
+import {
+  objectives as defaultObjectives,
+  alerts,
+  areas,
+} from "@/data/mockData";
+import type { Objective } from "@/data/mockData";
 import { Target, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -12,10 +17,27 @@ const getBarColor = (progress: number) => {
   return "hsl(0, 72%, 51%)";
 };
 
-const DashboardPage = () => {
+interface DashboardPageProps {
+  objectives?: Objective[];
+}
+
+const DashboardPage = ({ objectives = defaultObjectives }: DashboardPageProps = {}) => {
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
+
+  // Derive per-area & global progress from the live objectives list so the
+  // dashboard reflects OKRs created/edited at runtime.
+  const areaProgress = areas.map((area) => {
+    const areaObjs = objectives.filter((o) => o.area === area);
+    const avg = areaObjs.length > 0
+      ? Math.round(areaObjs.reduce((s, o) => s + o.progress, 0) / areaObjs.length)
+      : 0;
+    return { area, progress: avg, objectives: areaObjs.length };
+  });
+  const globalProgress = objectives.length
+    ? Math.round(objectives.reduce((s, o) => s + o.progress, 0) / objectives.length)
+    : 0;
 
   const kpiCards = [
     { title: "Cumplimiento Global", value: `${globalProgress}%`, icon: Target, color: "text-primary" },
