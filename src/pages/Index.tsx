@@ -62,7 +62,10 @@ const Index = () => {
     toast.info("Demo reiniciado", { description: "Todos los datos fueron restablecidos" });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (!isDemoTenant) {
+      await supabase.auth.signOut();
+    }
     setIsLoggedIn(false);
     setCurrentPage("dashboard");
     toast.info("Sesión cerrada");
