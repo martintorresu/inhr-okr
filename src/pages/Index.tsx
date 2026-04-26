@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { activeTenantId } from "@/data/tenant";
-import inhrLogo from "@/assets/inhr-logo.png";
+import inhrLogo from "@/assets/inhr-logo-small.png";
 import DashboardPage from "@/components/DashboardPage";
 import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
