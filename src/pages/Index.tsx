@@ -318,7 +318,7 @@ const Index = () => {
       />
       {activeTenantId === "inhr" && (
         <div className="pointer-events-none absolute top-4 right-6 z-30 flex items-center justify-center px-3 py-2">
-          <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="h-20 w-auto object-contain drop-shadow-sm" />
+          <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="h-26 w-auto object-contain drop-shadow-sm" style={{ height: "6.5rem" }} />
         </div>
       )}
       <main className="flex-1 p-8 overflow-auto">

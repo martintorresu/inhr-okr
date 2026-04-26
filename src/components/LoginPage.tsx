@@ -129,7 +129,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
       />
 
       <div className="absolute top-4 right-4 flex items-center z-10">
-        <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="h-20 w-auto object-contain" />
+        <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="w-auto object-contain" style={{ height: "6.5rem" }} />
       </div>
       <div className="w-full max-w-sm space-y-6 relative z-10 bg-card/90 backdrop-blur-xl p-8 rounded-2xl border border-white/40 shadow-2xl">
         <div className="flex flex-col items-center gap-3">
