@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { activeTenantId } from "@/data/tenant";
-import inhrLogo from "@/assets/inhr-logo-small.png";
+import inhrLogo from "@/assets/inhr-logo-inovahr.png";
 import DashboardPage from "@/components/DashboardPage";
 import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
@@ -317,9 +317,8 @@ const Index = () => {
         alertsCount={alertsCount}
       />
       {activeTenantId === "inhr" && (
-        <div className="pointer-events-none absolute top-4 right-6 z-30 flex flex-col items-center justify-center gap-0 px-3 py-2">
-          <img src={inhrLogo} alt="InHR" className="h-20 w-auto object-contain drop-shadow-sm" />
-          <span className="text-xs text-muted-foreground text-center leading-none">Powered by InHR</span>
+        <div className="pointer-events-none absolute top-4 right-6 z-30 flex items-center justify-center px-3 py-2">
+          <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="h-20 w-auto object-contain drop-shadow-sm" />
         </div>
       )}
       <main className="flex-1 p-8 overflow-auto">
