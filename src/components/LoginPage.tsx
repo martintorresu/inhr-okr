@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Target } from "lucide-react";
 import { activeTenant, activeTenantId } from "@/data/tenant";
-import inhrLogo from "@/assets/inhr-logo.png";
+import inhrLogo from "@/assets/inhr-logo-inovahr.png";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
@@ -128,9 +128,8 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(0_0%_0%/0.15)_100%)]"
       />
 
-      <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10">
-        <img src={inhrLogo} alt="InHR" className="h-40 w-auto object-contain" />
-        <span className="text-sm text-muted-foreground">Powered by InHR</span>
+      <div className="absolute top-4 right-4 flex items-center z-10">
+        <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="h-20 w-auto object-contain" />
       </div>
       <div className="w-full max-w-sm space-y-6 relative z-10 bg-card/90 backdrop-blur-xl p-8 rounded-2xl border border-white/40 shadow-2xl">
         <div className="flex flex-col items-center gap-3">
