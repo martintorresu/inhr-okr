@@ -39,6 +39,7 @@ const navItems = [
 ];
 
 const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
+  return (
     <aside
       className={cn(
         "w-64 min-h-screen flex flex-col relative overflow-hidden",
