@@ -317,9 +317,9 @@ const Index = () => {
         alertsCount={alertsCount}
       />
       {activeTenantId === "inhr" && (
-        <div className="pointer-events-none absolute top-4 right-6 z-30 flex flex-col items-center gap-1">
-          <img src={inhrLogo} alt="InHR" className="h-40 w-auto object-contain drop-shadow-sm" />
-          <span className="text-xs text-muted-foreground">Powered by InHR</span>
+        <div className="pointer-events-none absolute top-4 right-6 z-30 flex flex-col items-center justify-center gap-2 px-3 py-2">
+          <img src={inhrLogo} alt="InHR" className="h-20 w-auto object-contain drop-shadow-sm" />
+          <span className="text-xs text-muted-foreground text-center leading-none">Powered by InHR</span>
         </div>
       )}
       <main className="flex-1 p-8 overflow-auto">
