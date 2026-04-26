@@ -128,9 +128,14 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(0_0%_0%/0.15)_100%)]"
       />
 
-      <div className="absolute top-4 right-4 flex items-center z-10">
+      <a
+        href="https://www.inovahr.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-4 right-4 z-10 flex items-center justify-center px-3 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors"
+      >
         <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="w-auto object-contain" style={{ height: "6.5rem" }} />
-      </div>
+      </a>
       <div className="w-full max-w-sm space-y-6 relative z-10 bg-card/90 backdrop-blur-xl p-8 rounded-2xl border border-white/40 shadow-2xl">
         <div className="flex flex-col items-center gap-3">
           {activeTenant.logo ? (
