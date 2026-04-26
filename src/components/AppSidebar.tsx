@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { activeTenant, activeTenantId } from "@/data/tenant";
 
-const isInhr = activeTenantId === "inhr";
+// Unified sidebar style across all tenants (blue/celeste gradient).
+const isInhr = true;
 
 const inhrSidebarStyle: React.CSSProperties = {
   background:
