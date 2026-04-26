@@ -39,12 +39,6 @@ const navItems = [
 ];
 
 const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
-  return (
-    <aside className="w-64 min-h-screen bg-sidebar flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-  return (
     <aside
       className={cn(
         "w-64 min-h-screen flex flex-col relative overflow-hidden",
