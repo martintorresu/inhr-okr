@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
 import { activeTenant, activeTenantId } from "@/data/tenant";
+
+const isInhr = activeTenantId === "inhr";
+
+const inhrSidebarStyle: React.CSSProperties = {
+  background:
+    "linear-gradient(180deg, #0B2A6B 0%, #1E4BFF 45%, #3D7BFF 80%, #5DB6FF 100%)",
+};
 import {
   LayoutDashboard,
   Target,
