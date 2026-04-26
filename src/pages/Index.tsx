@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { activeTenantId } from "@/data/tenant";
+import inhrLogo from "@/assets/inhr-logo.png";
 import DashboardPage from "@/components/DashboardPage";
 import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
@@ -306,7 +307,7 @@ const Index = () => {
     : 0;
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background relative">
       <AppSidebar
         currentPage={currentPage}
         onNavigate={setCurrentPage}
@@ -315,6 +316,12 @@ const Index = () => {
         onLogout={handleLogout}
         alertsCount={alertsCount}
       />
+      {activeTenantId === "inhr" && (
+        <div className="pointer-events-none absolute top-4 right-6 z-30 flex flex-col items-center gap-1">
+          <img src={inhrLogo} alt="InHR" className="h-40 w-auto object-contain drop-shadow-sm" />
+          <span className="text-xs text-muted-foreground">Powered by InHR</span>
+        </div>
+      )}
       <main className="flex-1 p-8 overflow-auto">
         {renderPage()}
       </main>
