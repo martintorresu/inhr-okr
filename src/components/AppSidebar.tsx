@@ -43,7 +43,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
   return (
     <aside
       className={cn(
-        "w-64 min-h-screen flex flex-col relative overflow-hidden",
+        "w-64 h-screen sticky top-0 flex flex-col relative overflow-hidden",
         isInhr ? "text-white" : "bg-sidebar"
       )}
       style={isInhr ? inhrSidebarStyle : undefined}
@@ -115,7 +115,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1 relative z-10">
+      <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 relative z-10">
         {navItems.map((item) => {
           const showBadge = item.id === "alerts" && alertsCount > 0;
           const active = currentPage === item.id;
@@ -150,7 +150,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
       {activeTenantId !== "inovahr" && (
         <div
           className={cn(
-            "p-4 space-y-2 relative z-10",
+            "shrink-0 p-4 space-y-2 relative z-10",
             isInhr ? "border-t border-white/15" : "border-t border-sidebar-border"
           )}
         >
@@ -184,7 +184,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
       {/* User + Logout */}
       <div
         className={cn(
-          "p-4 relative z-10",
+          "shrink-0 mt-auto p-4 relative z-10",
           isInhr ? "border-t border-white/15" : "border-t border-sidebar-border"
         )}
       >
