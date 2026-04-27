@@ -3,7 +3,7 @@ import type { User, Objective, CheckIn, Alert } from "@/data/types";
 
 export const company_id = "quimetal";
 export const company_name = "DemoEnterprise";
-export const app_name = "DemoEnterprise Strategy";
+export const app_name = "OKR by InHR";
 export const logo = "/logos/demoenterprise.png";
 
 export const areas = [
