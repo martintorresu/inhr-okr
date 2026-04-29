@@ -320,8 +320,8 @@ const Index = () => {
         href="https://www.inovahr.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-2 sm:top-4 left-[calc(50%+8rem)] sm:left-[calc(50%+8rem)] -translate-x-1/2 z-30 flex items-center justify-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors max-w-[40vw] sm:max-w-none"
-        style={{ left: "calc(50% + 8rem)" }}
+        className="absolute top-2 sm:top-4 z-30 flex items-center justify-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors max-w-[40vw] sm:max-w-none -translate-x-1/2"
+        style={{ left: "calc(16rem + (100% - 16rem) / 2)" }}
       >
         <img
           src={inhrLogo}
