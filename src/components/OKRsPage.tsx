@@ -6,6 +6,7 @@ import { objectives as defaultObjectives } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { activeTenant } from "@/data/tenant";
 import type { TeamMember } from "@/lib/teamPersistence";
+import { withLiveProgress } from "@/lib/okrProgress";
 import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
@@ -21,7 +22,8 @@ const OKRsPage = ({ objectives, setObjectives, team }: OKRsPageProps = {}) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
   // Fallback to internal state if parent doesn't provide controlled state.
   const [internalObjectives, setInternalObjectives] = useState<Objective[]>(defaultObjectives);
-  const allObjectives = objectives ?? internalObjectives;
+  const sourceObjectives = objectives ?? internalObjectives;
+  const allObjectives = withLiveProgress(sourceObjectives);
   const updateObjectives: React.Dispatch<React.SetStateAction<Objective[]>> =
     setObjectives ?? setInternalObjectives;
   const [editing, setEditing] = useState<Objective | null>(null);

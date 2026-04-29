@@ -9,6 +9,7 @@ import {
 } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
+import { withLiveProgress } from "@/lib/okrProgress";
 import { Target, TrendingUp, AlertTriangle, CheckCircle2, Rocket, Clock, CalendarClock, UserX } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -36,7 +37,8 @@ const startOfQuarterISO = () => {
   return new Date(d.getFullYear(), qStartMonth, 1).toISOString().slice(0, 10);
 };
 
-const DashboardPage = ({ objectives = defaultObjectives, initiatives = [] }: DashboardPageProps = {}) => {
+const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiatives = [] }: DashboardPageProps = {}) => {
+  const objectives = withLiveProgress(rawObjectives);
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
