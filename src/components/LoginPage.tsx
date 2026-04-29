@@ -137,32 +137,21 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
           </div>
         </div>
 
-        {!isDemoTenant && (
-          <button
-            type="button"
-            onClick={handleGoogle}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-white border border-border text-foreground text-sm font-medium hover:bg-muted/50 transition-colors disabled:opacity-60"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 48 48" aria-hidden="true">
-              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.2 35.5 24 35.5c-6.4 0-11.5-5.1-11.5-11.5S17.6 12.5 24 12.5c2.9 0 5.6 1.1 7.6 2.9l5.7-5.7C33.7 6.4 29.1 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z"/>
-              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12.5 24 12.5c2.9 0 5.6 1.1 7.6 2.9l5.7-5.7C33.7 6.4 29.1 4.5 24 4.5 16.3 4.5 9.7 8.9 6.3 14.7z"/>
-              <path fill="#4CAF50" d="M24 43.5c5 0 9.6-1.9 13.1-5l-6.1-5c-2 1.4-4.4 2.2-7 2.2-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.1 16.3 43.5 24 43.5z"/>
-              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.1 5c-.4.4 6.4-4.7 6.4-14.5 0-1.2-.1-2.4-.4-3.5z"/>
-            </svg>
-            Continuar con Google
-          </button>
-        )}
-
-        {!isDemoTenant && (
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">o</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!isDemoTenant && mode === "signup" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="fullName">Nombre completo</label>
+              <input
+                id="fullName"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Ej: Ana Pérez"
+                required
+                className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground" htmlFor="email">Correo electrónico</label>
             <input
