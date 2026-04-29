@@ -55,7 +55,7 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           ? ci.progressManual
           : ci.progressAuto;
       latestCheckInProgress.set(ci.objectiveId, progress);
-      latestCheckInConfidence.set(ci.objectiveId, (ci.confidence ?? "green") as any);
+      latestCheckInConfidence.set(ci.objectiveId, ci.confidence ?? "green");
     }
     // Capture latest initiative snapshots reported in check-ins.
     for (const snap of ci.initiativeSnapshots ?? []) {
