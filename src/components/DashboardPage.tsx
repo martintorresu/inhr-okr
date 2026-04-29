@@ -43,13 +43,26 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
 
-  const areaProgress = areas.map((area) => {
-    const areaObjs = objectives.filter((o) => o.area === area);
-    const avg = areaObjs.length > 0
-      ? Math.round(areaObjs.reduce((s, o) => s + o.progress, 0) / areaObjs.length)
-      : 0;
-    return { area, progress: avg, objectives: areaObjs.length };
-  });
+  // Derive areas dynamically from current objectives so the chart reflects real data
+  // (including areas created on the fly), and skip areas without OKRs.
+  const areasFromObjectives = Array.from(
+    new Set(objectives.map((o) => (o.area ?? "").trim()).filter(Boolean))
+  );
+  const areasForChart = areasFromObjectives.length > 0 ? areasFromObjectives : areas;
+
+  const areaProgress = areasForChart
+    .map((area) => {
+      const areaObjs = objectives.filter(
+        (o) => (o.area ?? "").trim().toLowerCase() === area.toLowerCase()
+      );
+      const avg =
+        areaObjs.length > 0
+          ? Math.round(areaObjs.reduce((s, o) => s + o.progress, 0) / areaObjs.length)
+          : 0;
+      return { area, progress: avg, objectives: areaObjs.length };
+    })
+    .filter((a) => a.objectives > 0)
+    .sort((a, b) => b.progress - a.progress);
   const globalProgress = objectives.length
     ? Math.round(objectives.reduce((s, o) => s + o.progress, 0) / objectives.length)
     : 0;
@@ -148,18 +161,24 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={areaProgress} layout="vertical" margin={{ left: 20 }}>
-                  <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={12} />
-                  <YAxis type="category" dataKey="area" width={130} fontSize={12} />
-                  <Tooltip formatter={(value: number) => [`${value}%`, "Avance"]} />
-                  <Bar dataKey="progress" radius={[0, 6, 6, 0]} barSize={24}>
-                    {areaProgress.map((entry, index) => (
-                      <Cell key={index} fill={getBarColor(entry.progress)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {areaProgress.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                  Aún no hay OKRs registrados para mostrar avance por área.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={areaProgress} layout="vertical" margin={{ left: 20 }}>
+                    <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={12} />
+                    <YAxis type="category" dataKey="area" width={130} fontSize={12} />
+                    <Tooltip formatter={(value: number) => [`${value}%`, "Avance"]} />
+                    <Bar dataKey="progress" radius={[0, 6, 6, 0]} barSize={24}>
+                      {areaProgress.map((entry, index) => (
+                        <Cell key={index} fill={getBarColor(entry.progress)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
