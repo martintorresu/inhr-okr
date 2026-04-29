@@ -9,6 +9,7 @@ import {
 } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
+import type { CheckInRecord } from "@/lib/checkInsPersistence";
 import { withLiveProgress } from "@/lib/okrProgress";
 import { Target, TrendingUp, AlertTriangle, CheckCircle2, Rocket, Clock, CalendarClock, UserX } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
@@ -22,6 +23,7 @@ const getBarColor = (progress: number) => {
 interface DashboardPageProps {
   objectives?: Objective[];
   initiatives?: InitiativeWithContext[];
+  checkIns?: CheckInRecord[];
 }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
