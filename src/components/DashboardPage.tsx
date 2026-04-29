@@ -55,7 +55,7 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           ? ci.progressManual
           : ci.progressAuto;
       latestCheckInProgress.set(ci.objectiveId, progress);
-      latestCheckInConfidence.set(ci.objectiveId, (ci.confidence ?? "green") as any);
+      latestCheckInConfidence.set(ci.objectiveId, ci.confidence ?? "green");
     }
     // Capture latest initiative snapshots reported in check-ins.
     for (const snap of ci.initiativeSnapshots ?? []) {
@@ -88,7 +88,7 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
     const status = isDraft ? "draft" : deriveStatus(progress, conf);
     return { ...o, progress, status };
   });
-  const onTrack = objectives.filter((o) => o.status === "on_track").length;
+  const activeOkrs = objectives.filter((o) => o.status !== "draft" && o.status !== "completed").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
 
@@ -149,7 +149,7 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
 
   const kpiCards = [
     { title: "Cumplimiento Global", value: `${globalProgress}%`, icon: Target, color: "text-primary" },
-    { title: "OKRs en Curso", value: `${onTrack}`, icon: TrendingUp, color: "text-success" },
+    { title: "OKRs en Curso", value: `${activeOkrs}`, icon: TrendingUp, color: "text-success" },
     { title: "OKRs en Riesgo", value: `${atRisk}`, icon: AlertTriangle, color: "text-warning" },
     { title: "Key Results", value: `${totalKRs}`, icon: CheckCircle2, color: "text-info" },
   ];
