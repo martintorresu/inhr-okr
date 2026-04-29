@@ -4,7 +4,6 @@ import ProgressRing from "@/components/ProgressRing";
 import StatusBadge from "@/components/StatusBadge";
 import {
   objectives as defaultObjectives,
-  alerts,
   areas,
 } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
@@ -146,6 +145,83 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
   const overdueByResponsibleList = Object.entries(overdueByResponsible)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
+
+  // ===== Alertas activas (derivadas en tiempo real) =====
+  type DerivedAlert = {
+    id: string;
+    message: string;
+    date: string;
+    severity: "high" | "medium" | "low";
+  };
+  const derivedAlerts: DerivedAlert[] = [];
+
+  // OKRs en riesgo / atrasados
+  for (const o of objectives) {
+    if (o.status === "behind") {
+      derivedAlerts.push({
+        id: `okr-behind-${o.id}`,
+        message: `OKR "${o.title}" atrasado — ${o.progress}% de avance`,
+        date: today,
+        severity: "high",
+      });
+    } else if (o.status === "at_risk") {
+      derivedAlerts.push({
+        id: `okr-risk-${o.id}`,
+        message: `OKR "${o.title}" en riesgo — ${o.progress}% de avance`,
+        date: today,
+        severity: "medium",
+      });
+    }
+  }
+
+  // Iniciativas bloqueadas
+  for (const i of liveInitiatives.filter((x) => x.status === "blocked")) {
+    derivedAlerts.push({
+      id: `ini-blocked-${i.id}`,
+      message: `Iniciativa "${i.title}" bloqueada`,
+      date: today,
+      severity: "high",
+    });
+  }
+
+  // Iniciativas atrasadas
+  for (const i of overdueInis) {
+    derivedAlerts.push({
+      id: `ini-overdue-${i.id}`,
+      message: `Iniciativa "${i.title}" retrasada (vencía ${i.endDate})`,
+      date: i.endDate ?? today,
+      severity: "medium",
+    });
+  }
+
+  // Iniciativas que vencen en ≤7 días
+  for (const i of dueSoonInis) {
+    derivedAlerts.push({
+      id: `ini-due-${i.id}`,
+      message: `Iniciativa "${i.title}" vence el ${i.endDate}`,
+      date: i.endDate ?? today,
+      severity: "low",
+    });
+  }
+
+  // OKRs sin check-in registrado
+  for (const o of objectives) {
+    if (o.status === "draft" || o.status === "completed") continue;
+    if (!latestCheckInProgress.has(o.id)) {
+      derivedAlerts.push({
+        id: `okr-nocheckin-${o.id}`,
+        message: `Check-in pendiente para "${o.title}"`,
+        date: today,
+        severity: "medium",
+      });
+    }
+  }
+
+  // Ordenar por severidad (high → medium → low) y limitar
+  const severityRank = { high: 0, medium: 1, low: 2 } as const;
+  const alerts = derivedAlerts
+    .sort((a, b) => severityRank[a.severity] - severityRank[b.severity])
+    .slice(0, 10);
 
   const kpiCards = [
     { title: "Cumplimiento Global", value: `${globalProgress}%`, icon: Target, color: "text-primary" },
@@ -305,9 +381,20 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          {alerts.length === 0 && (
+            <p className="text-sm text-muted-foreground">No hay alertas activas. 🎉</p>
+          )}
           {alerts.map((alert) => (
             <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${alert.severity === "high" ? "bg-danger" : "bg-warning"}`} />
+              <div
+                className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
+                  alert.severity === "high"
+                    ? "bg-danger"
+                    : alert.severity === "medium"
+                    ? "bg-warning"
+                    : "bg-info"
+                }`}
+              />
               <div>
                 <p className="text-sm font-medium text-foreground">{alert.message}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{alert.date}</p>
