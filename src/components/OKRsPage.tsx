@@ -5,6 +5,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { objectives as defaultObjectives } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { activeTenant } from "@/data/tenant";
+import type { TeamMember } from "@/lib/teamPersistence";
 import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
@@ -13,9 +14,10 @@ import EditOKRDialog from "@/components/EditOKRDialog";
 interface OKRsPageProps {
   objectives?: Objective[];
   setObjectives?: React.Dispatch<React.SetStateAction<Objective[]>>;
+  team?: TeamMember[];
 }
 
-const OKRsPage = ({ objectives, setObjectives }: OKRsPageProps = {}) => {
+const OKRsPage = ({ objectives, setObjectives, team }: OKRsPageProps = {}) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
   // Fallback to internal state if parent doesn't provide controlled state.
   const [internalObjectives, setInternalObjectives] = useState<Objective[]>(defaultObjectives);
@@ -52,7 +54,7 @@ const OKRsPage = ({ objectives, setObjectives }: OKRsPageProps = {}) => {
           <h2 className="text-2xl font-bold text-foreground">OKRs</h2>
           <p className="text-muted-foreground text-sm mt-1">Q2 2026 · Objetivos y Key Results</p>
         </div>
-        <CreateOKRDialog onCreateOKR={handleCreateOKR} />
+        <CreateOKRDialog onCreateOKR={handleCreateOKR} team={team} />
       </div>
 
       <div className="space-y-4">
@@ -151,6 +153,7 @@ const OKRsPage = ({ objectives, setObjectives }: OKRsPageProps = {}) => {
           if (!v) setEditing(null);
         }}
         onSave={handleSaveEdit}
+        team={team}
       />
     </div>
   );
