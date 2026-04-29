@@ -147,7 +147,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
       </nav>
 
       {/* Demo controls — hidden for InovaHR tenant */}
-      {activeTenantId !== "inovahr" && (
+      {activeTenantId !== "inovahr" && activeTenantId !== "grupoactitud" && (
         <div
           className={cn(
             "shrink-0 p-4 space-y-2 relative z-10",
