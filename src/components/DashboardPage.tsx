@@ -82,8 +82,10 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
     const fromCheckIn = latestCheckInProgress.get(o.id);
     const conf = latestCheckInConfidence.get(o.id);
     const progress = fromCheckIn !== undefined ? fromCheckIn : o.progress;
-    // If the OKR is still a draft, keep it as draft regardless of progress.
-    const status = o.status === "draft" ? "draft" : deriveStatus(progress, conf);
+    // A draft OKR is promoted to a live status as soon as it has any reported
+    // progress (via check-in or KR updates); otherwise it stays as draft.
+    const isDraft = o.status === "draft" && progress <= 0 && fromCheckIn === undefined;
+    const status = isDraft ? "draft" : deriveStatus(progress, conf);
     return { ...o, progress, status };
   });
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
