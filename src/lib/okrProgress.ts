@@ -54,3 +54,28 @@ export const withLiveProgress = (objectives: Objective[]): Objective[] =>
     keyResults: o.keyResults.map((k) => ({ ...k, progress: computeKRProgress(k) })),
     progress: computeObjectiveProgress(o),
   }));
+
+/**
+ * Override objective progress with the latest check-in's reported progress
+ * when present. Falls back to live KR-based calculation otherwise.
+ *
+ * `checkIns` is expected to be ordered by date desc (as returned by loaders).
+ */
+export const withCheckInProgress = <T extends { id: string; progress: number }>(
+  objectives: T[],
+  checkIns: Array<{ objectiveId: string; progressManual?: number; progressAuto?: number }>
+): T[] => {
+  const latest = new Map<string, number>();
+  for (const ci of checkIns) {
+    if (latest.has(ci.objectiveId)) continue;
+    const value =
+      typeof ci.progressManual === "number" && ci.progressManual > 0
+        ? ci.progressManual
+        : ci.progressAuto ?? 0;
+    latest.set(ci.objectiveId, value);
+  }
+  return objectives.map((o) => {
+    const v = latest.get(o.id);
+    return v !== undefined ? { ...o, progress: v } : o;
+  });
+};
