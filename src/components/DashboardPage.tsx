@@ -4,7 +4,6 @@ import ProgressRing from "@/components/ProgressRing";
 import StatusBadge from "@/components/StatusBadge";
 import {
   objectives as defaultObjectives,
-  alerts,
   areas,
 } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
