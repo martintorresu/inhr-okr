@@ -307,7 +307,7 @@ const Index = () => {
     : 0;
 
   return (
-    <div className="flex min-h-screen bg-background relative">
+    <div className="flex h-screen overflow-hidden bg-background relative">
       <AppSidebar
         currentPage={currentPage}
         onNavigate={setCurrentPage}
@@ -328,7 +328,7 @@ const Index = () => {
           className="w-auto object-contain h-6 sm:h-8 md:h-10"
         />
       </a>
-      <main className="flex-1 p-8 pt-16 md:pt-20 overflow-auto">
+      <main className="flex-1 h-screen overflow-y-auto p-8 pt-16 md:pt-20">
         {renderPage()}
       </main>
     </div>
