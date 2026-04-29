@@ -40,23 +40,51 @@ const startOfQuarterISO = () => {
 };
 
 const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiatives = [], checkIns = [] }: DashboardPageProps = {}) => {
-  // Build a map: objectiveId -> latest check-in's manual progress (if any).
+  // Build maps from latest check-in per objective.
   const latestCheckInProgress = new Map<string, number>();
+  const latestCheckInConfidence = new Map<string, "green" | "yellow" | "red">();
+  const latestInitiativeSnapshot = new Map<
+    string,
+    { status: "not_started" | "in_progress" | "blocked" | "completed"; impact?: "low" | "medium" | "high" }
+  >();
+
   for (const ci of checkIns) {
-    const prev = latestCheckInProgress.get(ci.objectiveId);
-    const progress = typeof ci.progressManual === "number" && ci.progressManual > 0
-      ? ci.progressManual
-      : ci.progressAuto;
-    // checkIns come ordered by date desc from loader; keep first seen.
-    if (prev === undefined) latestCheckInProgress.set(ci.objectiveId, progress);
+    if (!latestCheckInProgress.has(ci.objectiveId)) {
+      const progress =
+        typeof ci.progressManual === "number" && ci.progressManual > 0
+          ? ci.progressManual
+          : ci.progressAuto;
+      latestCheckInProgress.set(ci.objectiveId, progress);
+      latestCheckInConfidence.set(ci.objectiveId, (ci.confidence ?? "green") as any);
+    }
+    // Capture latest initiative snapshots reported in check-ins.
+    for (const snap of ci.initiativeSnapshots ?? []) {
+      if (!latestInitiativeSnapshot.has(snap.initiativeId)) {
+        latestInitiativeSnapshot.set(snap.initiativeId, { status: snap.status, impact: snap.impact });
+      }
+    }
   }
 
+  // Derive a live status from progress + confidence (check-in driven).
+  const deriveStatus = (
+    progress: number,
+    confidence?: "green" | "yellow" | "red"
+  ): Objective["status"] => {
+    if (progress >= 100) return "completed";
+    if (confidence === "red" || progress < 40) return "behind";
+    if (confidence === "yellow" || progress < 70) return "at_risk";
+    return "on_track";
+  };
+
   const liveObjectives = withLiveProgress(rawObjectives);
-  // Override objective progress with the latest check-in value when available,
-  // so the Dashboard reflects what users report in Check-Ins.
+  // Override objective progress + status with the latest check-in value when available.
   const objectives = liveObjectives.map((o) => {
     const fromCheckIn = latestCheckInProgress.get(o.id);
-    return fromCheckIn !== undefined ? { ...o, progress: fromCheckIn } : o;
+    const conf = latestCheckInConfidence.get(o.id);
+    const progress = fromCheckIn !== undefined ? fromCheckIn : o.progress;
+    // If the OKR is still a draft, keep it as draft regardless of progress.
+    const status = o.status === "draft" ? "draft" : deriveStatus(progress, conf);
+    return { ...o, progress, status };
   });
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
@@ -86,19 +114,24 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
     ? Math.round(objectives.reduce((s, o) => s + o.progress, 0) / objectives.length)
     : 0;
 
-  // Initiative KPIs
+  // Initiative KPIs — refresh status from the latest check-in snapshot if present.
   const today = todayISO();
   const in7 = inDaysISO(7);
   const qStart = startOfQuarterISO();
 
-  const activeInis = initiatives.filter((i) => i.status !== "completed");
-  const overdueInis = initiatives.filter(
+  const liveInitiatives = initiatives.map((i) => {
+    const snap = latestInitiativeSnapshot.get(i.id);
+    return snap ? { ...i, status: snap.status } : i;
+  });
+
+  const activeInis = liveInitiatives.filter((i) => i.status !== "completed");
+  const overdueInis = liveInitiatives.filter(
     (i) => i.status !== "completed" && i.endDate && i.endDate < today
   );
-  const dueSoonInis = initiatives.filter(
+  const dueSoonInis = liveInitiatives.filter(
     (i) => i.status !== "completed" && i.endDate && i.endDate >= today && i.endDate <= in7
   );
-  const completedThisQuarter = initiatives.filter(
+  const completedThisQuarter = liveInitiatives.filter(
     (i) => i.status === "completed" && i.endDate && i.endDate >= qStart
   );
 
