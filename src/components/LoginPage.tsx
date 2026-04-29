@@ -3,7 +3,6 @@ import { Target } from "lucide-react";
 import { activeTenant, activeTenantId } from "@/data/tenant";
 import inhrLogo from "@/assets/inhr-logo-inovahr.png";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 
 interface LoginPageProps {
