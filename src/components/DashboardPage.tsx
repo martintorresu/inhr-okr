@@ -39,8 +39,25 @@ const startOfQuarterISO = () => {
   return new Date(d.getFullYear(), qStartMonth, 1).toISOString().slice(0, 10);
 };
 
-const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiatives = [] }: DashboardPageProps = {}) => {
-  const objectives = withLiveProgress(rawObjectives);
+const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiatives = [], checkIns = [] }: DashboardPageProps = {}) => {
+  // Build a map: objectiveId -> latest check-in's manual progress (if any).
+  const latestCheckInProgress = new Map<string, number>();
+  for (const ci of checkIns) {
+    const prev = latestCheckInProgress.get(ci.objectiveId);
+    const progress = typeof ci.progressManual === "number" && ci.progressManual > 0
+      ? ci.progressManual
+      : ci.progressAuto;
+    // checkIns come ordered by date desc from loader; keep first seen.
+    if (prev === undefined) latestCheckInProgress.set(ci.objectiveId, progress);
+  }
+
+  const liveObjectives = withLiveProgress(rawObjectives);
+  // Override objective progress with the latest check-in value when available,
+  // so the Dashboard reflects what users report in Check-Ins.
+  const objectives = liveObjectives.map((o) => {
+    const fromCheckIn = latestCheckInProgress.get(o.id);
+    return fromCheckIn !== undefined ? { ...o, progress: fromCheckIn } : o;
+  });
   const onTrack = objectives.filter((o) => o.status === "on_track").length;
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
