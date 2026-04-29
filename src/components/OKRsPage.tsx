@@ -6,7 +6,8 @@ import { objectives as defaultObjectives } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { activeTenant } from "@/data/tenant";
 import type { TeamMember } from "@/lib/teamPersistence";
-import { withLiveProgress } from "@/lib/okrProgress";
+import { withLiveProgress, withCheckInProgress } from "@/lib/okrProgress";
+import type { CheckInRecord } from "@/lib/checkInsPersistence";
 import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
@@ -16,14 +17,15 @@ interface OKRsPageProps {
   objectives?: Objective[];
   setObjectives?: React.Dispatch<React.SetStateAction<Objective[]>>;
   team?: TeamMember[];
+  checkIns?: CheckInRecord[];
 }
 
-const OKRsPage = ({ objectives, setObjectives, team }: OKRsPageProps = {}) => {
+const OKRsPage = ({ objectives, setObjectives, team, checkIns = [] }: OKRsPageProps = {}) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
   // Fallback to internal state if parent doesn't provide controlled state.
   const [internalObjectives, setInternalObjectives] = useState<Objective[]>(defaultObjectives);
   const sourceObjectives = objectives ?? internalObjectives;
-  const allObjectives = withLiveProgress(sourceObjectives);
+  const allObjectives = withCheckInProgress(withLiveProgress(sourceObjectives), checkIns);
   const updateObjectives: React.Dispatch<React.SetStateAction<Objective[]>> =
     setObjectives ?? setInternalObjectives;
   const [editing, setEditing] = useState<Objective | null>(null);
