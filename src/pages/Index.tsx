@@ -320,16 +320,15 @@ const Index = () => {
         href="https://www.inovahr.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-2 sm:top-4 z-30 flex items-center justify-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors max-w-[40vw] sm:max-w-none -translate-x-1/2"
-        style={{ left: "calc(16rem + (100% - 16rem) / 2)" }}
+        className="fixed top-2 right-3 sm:top-3 sm:right-4 z-30 flex items-center justify-center px-2 py-1 rounded-lg bg-white/70 backdrop-blur-sm border border-white/40 shadow-sm hover:bg-white/90 transition-colors"
       >
         <img
           src={inhrLogo}
           alt="InHR — Powered by InovaHR"
-          className="w-auto object-contain h-8 sm:h-12 md:h-[4.55rem]"
+          className="w-auto object-contain h-6 sm:h-8 md:h-10"
         />
       </a>
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-8 pt-16 md:pt-20 overflow-auto">
         {renderPage()}
       </main>
     </div>
