@@ -328,7 +328,7 @@ const Index = () => {
           className="w-auto object-contain h-6 sm:h-8 md:h-10"
         />
       </a>
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-8 pt-16 md:pt-20 overflow-auto">
         {renderPage()}
       </main>
     </div>
