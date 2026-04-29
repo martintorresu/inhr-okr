@@ -161,18 +161,24 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={areaProgress} layout="vertical" margin={{ left: 20 }}>
-                  <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={12} />
-                  <YAxis type="category" dataKey="area" width={130} fontSize={12} />
-                  <Tooltip formatter={(value: number) => [`${value}%`, "Avance"]} />
-                  <Bar dataKey="progress" radius={[0, 6, 6, 0]} barSize={24}>
-                    {areaProgress.map((entry, index) => (
-                      <Cell key={index} fill={getBarColor(entry.progress)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {areaProgress.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                  Aún no hay OKRs registrados para mostrar avance por área.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={areaProgress} layout="vertical" margin={{ left: 20 }}>
+                    <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={12} />
+                    <YAxis type="category" dataKey="area" width={130} fontSize={12} />
+                    <Tooltip formatter={(value: number) => [`${value}%`, "Avance"]} />
+                    <Bar dataKey="progress" radius={[0, 6, 6, 0]} barSize={24}>
+                      {areaProgress.map((entry, index) => (
+                        <Cell key={index} fill={getBarColor(entry.progress)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
