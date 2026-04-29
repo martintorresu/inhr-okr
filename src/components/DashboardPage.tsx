@@ -146,6 +146,83 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
 
+  // ===== Alertas activas (derivadas en tiempo real) =====
+  type DerivedAlert = {
+    id: string;
+    message: string;
+    date: string;
+    severity: "high" | "medium" | "low";
+  };
+  const derivedAlerts: DerivedAlert[] = [];
+
+  // OKRs en riesgo / atrasados
+  for (const o of objectives) {
+    if (o.status === "behind") {
+      derivedAlerts.push({
+        id: `okr-behind-${o.id}`,
+        message: `OKR "${o.title}" atrasado — ${o.progress}% de avance`,
+        date: today,
+        severity: "high",
+      });
+    } else if (o.status === "at_risk") {
+      derivedAlerts.push({
+        id: `okr-risk-${o.id}`,
+        message: `OKR "${o.title}" en riesgo — ${o.progress}% de avance`,
+        date: today,
+        severity: "medium",
+      });
+    }
+  }
+
+  // Iniciativas bloqueadas
+  for (const i of liveInitiatives.filter((x) => x.status === "blocked")) {
+    derivedAlerts.push({
+      id: `ini-blocked-${i.id}`,
+      message: `Iniciativa "${i.title}" bloqueada`,
+      date: today,
+      severity: "high",
+    });
+  }
+
+  // Iniciativas atrasadas
+  for (const i of overdueInis) {
+    derivedAlerts.push({
+      id: `ini-overdue-${i.id}`,
+      message: `Iniciativa "${i.title}" retrasada (vencía ${i.endDate})`,
+      date: i.endDate ?? today,
+      severity: "medium",
+    });
+  }
+
+  // Iniciativas que vencen en ≤7 días
+  for (const i of dueSoonInis) {
+    derivedAlerts.push({
+      id: `ini-due-${i.id}`,
+      message: `Iniciativa "${i.title}" vence el ${i.endDate}`,
+      date: i.endDate ?? today,
+      severity: "low",
+    });
+  }
+
+  // OKRs sin check-in registrado
+  for (const o of objectives) {
+    if (o.status === "draft" || o.status === "completed") continue;
+    if (!latestCheckInProgress.has(o.id)) {
+      derivedAlerts.push({
+        id: `okr-nocheckin-${o.id}`,
+        message: `Check-in pendiente para "${o.title}"`,
+        date: today,
+        severity: "medium",
+      });
+    }
+  }
+
+  // Ordenar por severidad (high → medium → low) y limitar
+  const severityRank = { high: 0, medium: 1, low: 2 } as const;
+  const alerts = derivedAlerts
+    .sort((a, b) => severityRank[a.severity] - severityRank[b.severity])
+    .slice(0, 10);
+
   const kpiCards = [
     { title: "Cumplimiento Global", value: `${globalProgress}%`, icon: Target, color: "text-primary" },
     { title: "OKRs en Curso", value: `${activeOkrs}`, icon: TrendingUp, color: "text-success" },
