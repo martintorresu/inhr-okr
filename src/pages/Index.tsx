@@ -320,9 +320,9 @@ const Index = () => {
         href="https://www.inovahr.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-4 right-6 z-30 flex items-center justify-center px-3 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors"
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center justify-center px-3 py-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 shadow-md hover:bg-white/80 transition-colors"
       >
-        <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="w-auto object-contain" style={{ height: "6.5rem" }} />
+        <img src={inhrLogo} alt="InHR — Powered by InovaHR" className="w-auto object-contain" style={{ height: "4.55rem" }} />
       </a>
       <main className="flex-1 p-8 overflow-auto">
         {renderPage()}
