@@ -239,11 +239,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
               <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
                 <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  El objetivo debe ser: <strong>Específico</strong> (claro y concreto),{" "}
-                  <strong>Medible</strong> (cuantificable),{" "}
-                  <strong>Alcanzable</strong> (realista),{" "}
-                  <strong>Relevante</strong> (alineado a la estrategia) y con{" "}
-                  <strong>Tiempo definido</strong> (plazo claro). — Criterios SMART.
+                  El objetivo debe ser <strong>desafiante</strong> e <strong>inspiracional</strong>: una declaración cualitativa que motive al equipo y marque una dirección ambiciosa. Los <strong>Key Results</strong> son los que deben cumplir con la lógica <strong>SMART</strong> (Específicos, Medibles, Alcanzables, Relevantes y con Tiempo definido).
                 </p>
               </div>
               <div className="space-y-1">
