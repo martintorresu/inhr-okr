@@ -6,6 +6,7 @@ import { objectives as defaultObjectives } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { activeTenant } from "@/data/tenant";
 import type { TeamMember } from "@/lib/teamPersistence";
+import { withLiveProgress } from "@/lib/okrProgress";
 import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
