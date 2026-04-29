@@ -3,6 +3,7 @@
 import * as inhr from "@/data/tenants/inhr";
 import * as quimetal from "@/data/tenants/quimetal";
 import * as inovahr from "@/data/tenants/inovahr";
+import * as grupoactitud from "@/data/tenants/grupoactitud";
 
 type TenantModule = typeof inhr;
 
@@ -16,6 +17,7 @@ const detectTenantId = (): string => {
   // okr-inhr.inovahr-app.com is the InovaHR tenant app (not to be confused with the "inhr" demo tenant).
   if (host.includes("okr-inhr.inovahr-app.com")) return "inovahr";
   if (host.includes("okr-inovahr")) return "inovahr";
+  if (host.includes("okr-grupoactitud") || host.includes("grupoactitud")) return "grupoactitud";
   return "inhr";
 };
 
@@ -25,6 +27,7 @@ const tenants: Record<string, TenantModule> = {
   inhr,
   quimetal: quimetal as unknown as TenantModule,
   inovahr: inovahr as unknown as TenantModule,
+  grupoactitud: grupoactitud as unknown as TenantModule,
 };
 
 export const activeTenant: TenantModule = tenants[tenantId] ?? inhr;
