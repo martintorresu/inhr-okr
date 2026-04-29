@@ -45,10 +45,14 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: fullName },
+          },
         });
         if (error) throw error;
-        toast.success("Cuenta creada", { description: "Revisa tu correo para confirmar el email." });
+        toast.success("Cuenta creada", { description: "Revisa tu correo para confirmar el email antes de iniciar sesión." });
+        setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -58,26 +62,6 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
       const msg = err instanceof Error ? err.message : "Error de autenticación";
       toast.error(msg);
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogle = async () => {
-    setLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error(result.error.message ?? "No se pudo iniciar con Google");
-        setLoading(false);
-        return;
-      }
-      if (result.redirected) return; // browser navigates away
-      onLogin();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Error con Google";
-      toast.error(msg);
       setLoading(false);
     }
   };
