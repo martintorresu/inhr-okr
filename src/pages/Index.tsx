@@ -275,7 +275,7 @@ const Index = () => {
           />
         );
       default:
-        return <DashboardPage objectives={objectives} initiatives={initiatives} />;
+        return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
     }
   };
 
