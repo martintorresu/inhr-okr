@@ -381,9 +381,20 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          {alerts.length === 0 && (
+            <p className="text-sm text-muted-foreground">No hay alertas activas. 🎉</p>
+          )}
           {alerts.map((alert) => (
             <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${alert.severity === "high" ? "bg-danger" : "bg-warning"}`} />
+              <div
+                className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${
+                  alert.severity === "high"
+                    ? "bg-danger"
+                    : alert.severity === "medium"
+                    ? "bg-warning"
+                    : "bg-info"
+                }`}
+              />
               <div>
                 <p className="text-sm font-medium text-foreground">{alert.message}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{alert.date}</p>
