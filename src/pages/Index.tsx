@@ -235,7 +235,7 @@ const Index = () => {
       case "okrs":
         return <OKRsPage objectives={objectives} setObjectives={setObjectives} team={team} />;
       case "dashboard":
-        return <DashboardPage objectives={objectives} initiatives={initiatives} />;
+        return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
       case "initiatives":
         return (
           <InitiativesPage
@@ -275,7 +275,7 @@ const Index = () => {
           />
         );
       default:
-        return <DashboardPage objectives={objectives} initiatives={initiatives} />;
+        return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
     }
   };
 
