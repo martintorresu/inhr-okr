@@ -43,13 +43,26 @@ const DashboardPage = ({ objectives: rawObjectives = defaultObjectives, initiati
   const atRisk = objectives.filter((o) => o.status === "at_risk" || o.status === "behind").length;
   const totalKRs = objectives.reduce((s, o) => s + o.keyResults.length, 0);
 
-  const areaProgress = areas.map((area) => {
-    const areaObjs = objectives.filter((o) => o.area === area);
-    const avg = areaObjs.length > 0
-      ? Math.round(areaObjs.reduce((s, o) => s + o.progress, 0) / areaObjs.length)
-      : 0;
-    return { area, progress: avg, objectives: areaObjs.length };
-  });
+  // Derive areas dynamically from current objectives so the chart reflects real data
+  // (including areas created on the fly), and skip areas without OKRs.
+  const areasFromObjectives = Array.from(
+    new Set(objectives.map((o) => (o.area ?? "").trim()).filter(Boolean))
+  );
+  const areasForChart = areasFromObjectives.length > 0 ? areasFromObjectives : areas;
+
+  const areaProgress = areasForChart
+    .map((area) => {
+      const areaObjs = objectives.filter(
+        (o) => (o.area ?? "").trim().toLowerCase() === area.toLowerCase()
+      );
+      const avg =
+        areaObjs.length > 0
+          ? Math.round(areaObjs.reduce((s, o) => s + o.progress, 0) / areaObjs.length)
+          : 0;
+      return { area, progress: avg, objectives: areaObjs.length };
+    })
+    .filter((a) => a.objectives > 0)
+    .sort((a, b) => b.progress - a.progress);
   const globalProgress = objectives.length
     ? Math.round(objectives.reduce((s, o) => s + o.progress, 0) / objectives.length)
     : 0;
