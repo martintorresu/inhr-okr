@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Info, Eye, ArrowLeft, UserPlus, X, Mail, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { areas, users } from "@/data/mockData";
+import { areas, users as defaultUsers } from "@/data/mockData";
+import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ const phoneRegex = /^[+0-9\s()-]{6,20}$/;
 
 interface CreateOKRDialogProps {
   onCreateOKR: (objective: Objective) => void;
+  team?: TeamMember[];
 }
 
 const cycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
@@ -55,7 +57,8 @@ const emptyKR = (): KRDraft => ({
   weight: "",
 });
 
-const CreateOKRDialog = ({ onCreateOKR }: CreateOKRDialogProps) => {
+const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
+  const users = team && team.length ? team : defaultUsers;
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"form" | "preview">("form");
   const [title, setTitle] = useState("");

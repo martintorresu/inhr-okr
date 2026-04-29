@@ -17,7 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { areas, users } from "@/data/mockData";
+import { areas, users as defaultUsers } from "@/data/mockData";
+import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective, KeyResult } from "@/data/mockData";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ interface EditOKRDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSave: (objective: Objective) => void;
+  team?: TeamMember[];
 }
 
 const cycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
@@ -63,7 +65,8 @@ const krToDraft = (kr: KeyResult): KRDraft => ({
   weight: kr.weight !== undefined ? String(kr.weight) : "",
 });
 
-const EditOKRDialog = ({ objective, open, onOpenChange, onSave }: EditOKRDialogProps) => {
+const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRDialogProps) => {
+  const users = team && team.length ? team : defaultUsers;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [area, setArea] = useState("");
