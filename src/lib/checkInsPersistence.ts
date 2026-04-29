@@ -3,7 +3,7 @@ import type { CheckIn } from "@/data/types";
 
 export type Confidence = "green" | "yellow" | "red";
 export type Trend = "up" | "flat" | "down";
-export type CheckInStatus = "pending" | "submitted";
+export type CheckInStatus = "pending" | "completed";
 
 export interface BlockerEntry {
   type: "resources" | "dependencies" | "alignment" | "priorities" | "other";
@@ -64,7 +64,7 @@ const toRecord = (row: any): CheckInRecord => ({
   scoreManual: row.score_manual === null || row.score_manual === undefined ? null : Number(row.score_manual),
   confidence: (row.confidence ?? "green") as Confidence,
   trend: (row.trend ?? "flat") as Trend,
-  status: (row.status ?? "submitted") as CheckInStatus,
+  status: (row.status ?? "completed") as CheckInStatus,
   blockers: Array.isArray(row.blockers) ? row.blockers : [],
   nextCommitments: Array.isArray(row.next_commitments) ? row.next_commitments : [],
   initiativeSnapshots: Array.isArray(row.initiative_snapshots) ? row.initiative_snapshots : [],
@@ -89,7 +89,7 @@ const toRow = (tenantId: string, ci: CheckInRecord) => ({
   score_manual: ci.scoreManual === null || ci.scoreManual === undefined ? null : Number(ci.scoreManual.toFixed(2)),
   confidence: ci.confidence ?? "green",
   trend: ci.trend ?? "flat",
-  status: ci.status ?? "submitted",
+  status: ci.status ?? "completed",
   blockers: ci.blockers ?? [],
   next_commitments: ci.nextCommitments ?? [],
   initiative_snapshots: ci.initiativeSnapshots ?? [],
@@ -136,7 +136,7 @@ export const seedCheckInsFromMocks = async (
     scoreManual: null,
     confidence: m.progress >= 60 ? "green" : m.progress >= 35 ? "yellow" : "red",
     trend: "flat",
-    status: "submitted",
+    status: "completed",
     blockers: m.blockers ? [{ type: "other", description: m.blockers }] : [],
     nextCommitments: [],
     initiativeSnapshots: [],

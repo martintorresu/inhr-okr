@@ -89,7 +89,7 @@ const emptyDraft = (objectiveId: string, authorName: string, authorUserId?: stri
   scoreManual: null,
   confidence: "green",
   trend: "flat",
-  status: "submitted",
+  status: "completed",
   blockers: [],
   nextCommitments: [],
   initiativeSnapshots: [],

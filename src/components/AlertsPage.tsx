@@ -45,7 +45,7 @@ export const computeAlerts = (
 
   const lastByObj: Record<string, CheckInRecord | undefined> = {};
   [...checkIns]
-    .filter((c) => c.status === "submitted")
+    .filter((c) => c.status === "completed")
     .sort((a, b) => b.checkinDate.localeCompare(a.checkinDate))
     .forEach((c) => { if (!lastByObj[c.objectiveId]) lastByObj[c.objectiveId] = c; });
 
