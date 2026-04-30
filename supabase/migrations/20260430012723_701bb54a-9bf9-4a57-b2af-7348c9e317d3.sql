@@ -1,0 +1,1 @@
+UPDATE auth.users SET email_confirmed_at = NULL WHERE email = 'martin@inovahr.com';
