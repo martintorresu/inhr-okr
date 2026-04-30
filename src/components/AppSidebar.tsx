@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { activeTenant, activeTenantId } from "@/data/tenant";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Unified sidebar style across all tenants (blue/celeste gradient).
 const isInhr = true;
