@@ -249,7 +249,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
                       isInhr ? "text-white" : "text-sidebar-accent-foreground"
                     )}
                   >
-                    {adminUser?.name ?? "Usuario"}
+                    {displayName}
                   </p>
                   <p
                     className={cn(
@@ -257,7 +257,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
                       isInhr ? "text-sky-200/90" : "text-sidebar-muted"
                     )}
                   >
-                    Admin
+                    {displayRole}
                   </p>
                 </div>
               </div>
