@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { activeTenant, activeTenantId } from "@/data/tenant";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Unified sidebar style across all tenants (blue/celeste gradient).
 const isInhr = true;
@@ -40,6 +42,40 @@ const navItems = [
 ];
 
 const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
+  const [authUser, setAuthUser] = useState<{ name: string; roleLabel: string } | null>(null);
+
+  useEffect(() => {
+    if (activeTenantId === "quimetal") return;
+    let cancelled = false;
+    (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user || cancelled) return;
+
+      const name =
+        (user.user_metadata?.full_name as string) ||
+        (user.user_metadata?.name as string) ||
+        user.email ||
+        "Usuario";
+
+      const { data: roleRow } = await (supabase as any)
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("tenant_id", activeTenantId)
+        .order("role", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const role = roleRow?.role ?? "member";
+      const roleLabel =
+        role === "admin" ? "Administrador" : role === "moderator" ? "Moderador" : "Miembro";
+
+      if (!cancelled) setAuthUser({ name, roleLabel });
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <aside
       className={cn(
@@ -189,8 +225,10 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
         )}
       >
         {(() => {
-          const adminUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
-          const initials = adminUser?.name.split(" ").map((n) => n[0]).slice(0, 2).join("") ?? "U";
+          const fallbackUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
+          const displayName = authUser?.name ?? fallbackUser?.name ?? "Usuario";
+          const displayRole = authUser?.roleLabel ?? "Admin";
+          const initials = displayName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
           return (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
@@ -211,7 +249,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
                       isInhr ? "text-white" : "text-sidebar-accent-foreground"
                     )}
                   >
-                    {adminUser?.name ?? "Usuario"}
+                    {displayName}
                   </p>
                   <p
                     className={cn(
@@ -219,7 +257,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
                       isInhr ? "text-sky-200/90" : "text-sidebar-muted"
                     )}
                   >
-                    Admin
+                    {displayRole}
                   </p>
                 </div>
               </div>
