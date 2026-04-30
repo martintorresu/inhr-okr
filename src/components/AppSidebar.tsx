@@ -225,8 +225,10 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
         )}
       >
         {(() => {
-          const adminUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
-          const initials = adminUser?.name.split(" ").map((n) => n[0]).slice(0, 2).join("") ?? "U";
+          const fallbackUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
+          const displayName = authUser?.name ?? fallbackUser?.name ?? "Usuario";
+          const displayRole = authUser?.roleLabel ?? "Admin";
+          const initials = displayName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
           return (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
