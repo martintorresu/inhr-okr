@@ -42,6 +42,40 @@ const navItems = [
 ];
 
 const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
+  const [authUser, setAuthUser] = useState<{ name: string; roleLabel: string } | null>(null);
+
+  useEffect(() => {
+    if (activeTenantId === "quimetal") return;
+    let cancelled = false;
+    (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user || cancelled) return;
+
+      const name =
+        (user.user_metadata?.full_name as string) ||
+        (user.user_metadata?.name as string) ||
+        user.email ||
+        "Usuario";
+
+      const { data: roleRow } = await (supabase as any)
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("tenant_id", activeTenantId)
+        .order("role", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      const role = roleRow?.role ?? "member";
+      const roleLabel =
+        role === "admin" ? "Administrador" : role === "moderator" ? "Moderador" : "Miembro";
+
+      if (!cancelled) setAuthUser({ name, roleLabel });
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <aside
       className={cn(
