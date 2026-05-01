@@ -180,12 +180,17 @@ const KRReviewButton = ({
             </>
           )}
         </Button>
-        {autoEnabled && canReview && !result && !loading && (
+        {autoEnabled && canReview && !canAutoReview && !result && !loading && (
+          <span className="text-[11px] text-muted-foreground">
+            Escribe al menos {AUTO_MIN_LENGTH} caracteres para validación automática
+          </span>
+        )}
+        {autoEnabled && canAutoReview && !result && !loading && (
           <span className="text-[11px] text-muted-foreground">Validación automática activa</span>
         )}
         {autoEnabled && loading && (
           <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
-            <Loader2 className="w-3 h-3 animate-spin" /> Validando en vivo…
+            <Loader2 className="w-3 h-3 animate-spin" /> Analizando...
           </span>
         )}
       </div>
