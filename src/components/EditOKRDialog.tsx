@@ -80,6 +80,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
+  const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (objective && open) {
@@ -94,6 +95,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
       setKeyResults(
         objective.keyResults.length ? objective.keyResults.map(krToDraft) : [emptyKR()]
       );
+      setBlockedKRs({});
     }
   }, [objective, open]);
 
@@ -105,12 +107,28 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const removeKR = (idx: number) => {
     if (keyResults.length <= 1) return;
     setKeyResults(keyResults.filter((_, i) => i !== idx));
+    setBlockedKRs((prev) => {
+      const next: Record<number, boolean> = {};
+      Object.entries(prev).forEach(([k, v]) => {
+        const i = Number(k);
+        if (i < idx) next[i] = v;
+        else if (i > idx) next[i - 1] = v;
+      });
+      return next;
+    });
   };
 
   const updateKR = (idx: number, field: keyof KRDraft, value: string) => {
     const updated = [...keyResults];
     updated[idx] = { ...updated[idx], [field]: value } as KRDraft;
     setKeyResults(updated);
+    if (field === "title") {
+      setBlockedKRs((prev) => {
+        if (!(idx in prev)) return prev;
+        const { [idx]: _omit, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const toggleContributor = (name: string) => {
