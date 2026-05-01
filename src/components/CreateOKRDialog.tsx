@@ -84,12 +84,28 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const removeKR = (idx: number) => {
     if (keyResults.length <= 1) return;
     setKeyResults(keyResults.filter((_, i) => i !== idx));
+    setBlockedKRs((prev) => {
+      const next: Record<number, boolean> = {};
+      Object.entries(prev).forEach(([k, v]) => {
+        const i = Number(k);
+        if (i < idx) next[i] = v;
+        else if (i > idx) next[i - 1] = v;
+      });
+      return next;
+    });
   };
 
   const updateKR = (idx: number, field: keyof KRDraft, value: string) => {
     const updated = [...keyResults];
     updated[idx] = { ...updated[idx], [field]: value };
     setKeyResults(updated);
+    if (field === "title") {
+      setBlockedKRs((prev) => {
+        if (!(idx in prev)) return prev;
+        const { [idx]: _omit, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const toggleContributor = (name: string) => {
