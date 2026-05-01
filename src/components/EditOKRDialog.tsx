@@ -530,7 +530,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} className="gap-2">
+            <Button onClick={handleSave} className="gap-2" disabled={Object.values(blockedKRs).some(Boolean)}>
               <Save className="w-4 h-4" /> Guardar cambios
             </Button>
           </div>
