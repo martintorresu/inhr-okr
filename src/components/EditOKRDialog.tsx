@@ -472,6 +472,30 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         onChange={(e) => updateKR(idx, "weight", e.target.value)}
                       />
                     </div>
+                    <KRReviewButton
+                      kr_id={kr.id}
+                      objective={title}
+                      keyResult={kr.title}
+                      cycle={cycle}
+                      context={{
+                        metricType: kr.metricType,
+                        initialValue: kr.initialValue,
+                        current: kr.current,
+                        target: kr.target,
+                        direction: kr.direction,
+                        weight: kr.weight,
+                      }}
+                      onApplySuggestion={(improved) => updateKR(idx, "title", improved)}
+                      onResultChange={(r) =>
+                        setBlockedKRs((prev) => {
+                          if (!r) {
+                            const { [idx]: _omit, ...rest } = prev;
+                            return rest;
+                          }
+                          return { ...prev, [idx]: r.blocked };
+                        })
+                      }
+                    />
                   </div>
                   <Button
                     type="button"
@@ -486,6 +510,11 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                 </div>
               ))}
             </div>
+            {Object.values(blockedKRs).some(Boolean) && (
+              <p className="text-xs font-medium text-destructive">
+                Hay KRs bloqueados por la revisión IA. Aplicá las sugerencias o ajustá los KRs antes de guardar.
+              </p>
+            )}
             {totalWeight > 0 && (
               <p
                 className={`text-xs font-medium ${
