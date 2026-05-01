@@ -133,6 +133,7 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        temperature: 0,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
