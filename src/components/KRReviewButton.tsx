@@ -82,11 +82,15 @@ const KRReviewButton = ({
   const [result, setResult] = useState<KRReviewResult | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [autoEnabled, setAutoEnabled] = useState(autoReview);
+  const [lastWasAuto, setLastWasAuto] = useState(false);
   const debounceRef = useRef<number | null>(null);
   const lastReviewedKey = useRef<string>("");
   const inFlight = useRef(false);
 
   const canReview = keyResult.trim().length > 0 && objective.trim().length > 0;
+  // Umbral para validación automática: el KR debe tener contenido mínimo significativo
+  const AUTO_MIN_LENGTH = 15;
+  const canAutoReview = canReview && keyResult.trim().length >= AUTO_MIN_LENGTH;
 
   const runReview = useCallback(
     async (silent: boolean) => {
@@ -104,6 +108,7 @@ const KRReviewButton = ({
         const r = data as KRReviewResult;
         lastReviewedKey.current = key;
         setResult(r);
+        setLastWasAuto(silent);
         setShowSuggestions(false);
         onResultChange?.(r);
         if (!silent) {
@@ -123,9 +128,9 @@ const KRReviewButton = ({
     [canReview, kr_id, objective, keyResult, cycle, JSON.stringify(context ?? {}), onResultChange],
   );
 
-  // Auto-review con debounce al cambiar el KR/objetivo
+  // Auto-review con debounce: solo si KR tiene >=15 chars y objetivo existe
   useEffect(() => {
-    if (!autoEnabled || !canReview) return;
+    if (!autoEnabled || !canAutoReview) return;
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
     debounceRef.current = window.setTimeout(() => {
       runReview(true);
@@ -134,7 +139,7 @@ const KRReviewButton = ({
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keyResult, objective, cycle, JSON.stringify(context ?? {}), autoEnabled, canReview, debounceMs]);
+  }, [keyResult, objective, cycle, JSON.stringify(context ?? {}), autoEnabled, canAutoReview, debounceMs]);
 
   // Si el KR queda vacío, limpiamos el resultado anterior
   useEffect(() => {
