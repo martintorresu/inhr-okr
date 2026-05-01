@@ -260,6 +260,57 @@ export type Database = {
         }
         Relationships: []
       }
+      okr_kr_reviews: {
+        Row: {
+          ai_review: Json
+          blocked: boolean
+          created_at: string
+          id: string
+          kr_id: string
+          level: string
+          score: number
+          smart_achievable: number
+          smart_measurable: number
+          smart_relevant: number
+          smart_specific: number
+          smart_timebound: number
+          source: string
+          user_id: string
+        }
+        Insert: {
+          ai_review: Json
+          blocked: boolean
+          created_at?: string
+          id?: string
+          kr_id: string
+          level: string
+          score: number
+          smart_achievable: number
+          smart_measurable: number
+          smart_relevant: number
+          smart_specific: number
+          smart_timebound: number
+          source: string
+          user_id: string
+        }
+        Update: {
+          ai_review?: Json
+          blocked?: boolean
+          created_at?: string
+          id?: string
+          kr_id?: string
+          level?: string
+          score?: number
+          smart_achievable?: number
+          smart_measurable?: number
+          smart_relevant?: number
+          smart_specific?: number
+          smart_timebound?: number
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       okr_objectives: {
         Row: {
           area: string
