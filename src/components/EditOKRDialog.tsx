@@ -21,6 +21,7 @@ import { areas, users as defaultUsers } from "@/data/mockData";
 import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective, KeyResult } from "@/data/mockData";
 import { toast } from "sonner";
+import KRReviewButton from "@/components/KRReviewButton";
 
 interface KRDraft {
   id?: string;
