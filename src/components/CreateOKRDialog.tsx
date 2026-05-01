@@ -468,7 +468,6 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
                           onChange={(e) => updateKR(idx, "weight", e.target.value)}
                         />
                       </div>
-                      </div>
                       <KRReviewButton
                         objective={title}
                         keyResult={kr.title}
