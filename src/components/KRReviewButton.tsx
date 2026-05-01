@@ -233,14 +233,14 @@ const KRReviewButton = ({
             )}
           </div>
 
-          {result.blocked && (
+          {!lastWasAuto && result.blocked && (
             <p className="text-xs font-semibold text-destructive flex items-center gap-1">
               <AlertTriangle className="w-3.5 h-3.5" /> Este KR no cumple estándar mínimo SMART
             </p>
           )}
 
-          {/* Advertencias clave (top 2) */}
-          {topIssues.length > 0 && (
+          {/* Advertencias clave (top 2) — solo en revisión manual */}
+          {!lastWasAuto && topIssues.length > 0 && (
             <ul className="list-disc pl-5 space-y-0.5 text-xs text-foreground">
               {topIssues.map((issue, i) => (
                 <li key={i}>{issue}</li>
@@ -248,8 +248,8 @@ const KRReviewButton = ({
             </ul>
           )}
 
-          {/* Toggle: Ver mejora */}
-          {(result.ai_review.suggestions.length > 0 || result.ai_review.improved_kr) && (
+          {/* Toggle: Ver mejora — solo tras revisión manual */}
+          {!lastWasAuto && (result.ai_review.suggestions.length > 0 || result.ai_review.improved_kr) && (
             <div className="pt-1">
               <Button
                 type="button"
