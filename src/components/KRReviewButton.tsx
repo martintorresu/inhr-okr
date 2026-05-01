@@ -77,15 +77,18 @@ const KRReviewButton = ({
     }
     setLoading(true);
     try {
+      const payload = { kr_id, objective, keyResult, cycle, context };
+      console.log("[review-kr] request payload:", payload);
       const { data, error } = await supabase.functions.invoke("review-kr", {
-        body: { kr_id, objective, keyResult, cycle, context },
+        body: payload,
       });
+      console.log("[review-kr] response:", { data, error });
       if (error) throw error;
       const r = data as KRReviewResult;
       setResult(r);
       onResultChange?.(r);
       if (r.blocked) {
-        toast.error("KR bloqueado: revisá los problemas detectados");
+        toast.error("Este KR no cumple estándar mínimo SMART");
       } else {
         toast.success(`KR ${r.level.toLowerCase()} (score ${r.score})`);
       }
@@ -143,6 +146,12 @@ const KRReviewButton = ({
               </Badge>
             )}
           </div>
+
+          {result.blocked && (
+            <p className="text-xs font-semibold text-destructive flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> Este KR no cumple estándar mínimo SMART
+            </p>
+          )}
 
           {/* SMART dimensions */}
           <div className="grid grid-cols-5 gap-1.5 text-xs">
