@@ -43,6 +43,7 @@ interface ReviewPayload {
   objective?: string;
   keyResult?: string;
   cycle?: string;
+  source?: "auto" | "manual";
   context?: {
     metric?: string;
     baseline?: number | string;
@@ -79,8 +80,10 @@ Deno.serve(async (req) => {
   if (!authHeader?.startsWith("Bearer ")) {
     return json(401, { error: "Unauthorized" });
   }
+  let supabase;
+  let userId: string;
   try {
-    const supabase = createClient(
+    supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
@@ -90,6 +93,7 @@ Deno.serve(async (req) => {
     if (claimsError || !claims?.claims?.sub) {
       return json(401, { error: "Unauthorized" });
     }
+    userId = claims.claims.sub as string;
   } catch (e) {
     console.error("Auth error", e);
     return json(401, { error: "Unauthorized" });
@@ -324,12 +328,44 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       smartScore.measurable <= 2 ||
       smartScore.timeBound  <= 2;
 
+    const finalScore = Number(score.toFixed(2));
+    const source: "auto" | "manual" = payload.source === "manual" ? "manual" : "auto";
+
+    // 6. Persistencia best-effort: nunca debe romper la respuesta principal.
+    if (payload.kr_id) {
+      try {
+        const { error: insertError } = await supabase
+          .from("okr_kr_reviews")
+          .insert({
+            kr_id: payload.kr_id,
+            user_id: userId,
+            score: finalScore,
+            level,
+            blocked,
+            smart_specific: smartScore.specific,
+            smart_measurable: smartScore.measurable,
+            smart_achievable: smartScore.achievable,
+            smart_relevant: smartScore.relevant,
+            smart_timebound: smartScore.timeBound,
+            ai_review: review,
+            source,
+          });
+        if (insertError) {
+          console.error("Persistencia falló (insert error)", insertError);
+        }
+      } catch (e) {
+        console.error("Persistencia falló", e);
+      }
+    } else {
+      console.warn("Persistencia omitida: payload.kr_id no provisto");
+    }
+
     return json(200, {
       kr_id: payload.kr_id ?? null,
       reviewed_at: new Date().toISOString(),
       ai_review: review,
       smart_score: smartScore,
-      score: Number(score.toFixed(2)),
+      score: finalScore,
       level,
       blocked,
     });
