@@ -64,7 +64,11 @@ Criterios:
 - Ambición: idealmente "stretch" (50-70% de probabilidad de logro).
 - Claridad de la métrica (baseline → target).
 
-Sé directo, accionable y concreto. No inventes datos que no estén en el payload.`;
+Sé directo, accionable y concreto. No inventes datos que no estén en el payload.
+
+Reglas estrictas sobre valores numéricos:
+- No inventes valores numéricos de baseline, target o current si no están claramente definidos en el input. Si no existe baseline confiable, indícalo explícitamente en 'issues' y propone una estructura de KR sin asumir valores ficticios (usa placeholders como [BASELINE], [TARGET] en 'improved_kr' cuando falte el dato).
+- Si el baseline es inválido (ej: 0 cuando no corresponde, o un valor incoherente con la métrica), sugiere corregirlo en 'suggestions' en lugar de reemplazarlo por un valor arbitrario en 'improved_kr'.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
