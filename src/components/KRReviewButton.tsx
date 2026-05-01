@@ -100,8 +100,9 @@ const KRReviewButton = ({
       inFlight.current = true;
       setLoading(true);
       try {
-        const payload = { kr_id, objective, keyResult, cycle, context };
-        console.log("[review-kr] request payload:", payload, { silent });
+        const source: "auto" | "manual" = silent ? "auto" : "manual";
+        const payload = { kr_id, objective, keyResult, cycle, context, source };
+        console.log("[review-kr] request payload:", payload);
         const { data, error } = await supabase.functions.invoke("review-kr", { body: payload });
         console.log("[review-kr] response:", { data, error });
         if (error) throw error;
