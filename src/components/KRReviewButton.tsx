@@ -147,6 +147,12 @@ const KRReviewButton = ({
             )}
           </div>
 
+          {result.blocked && (
+            <p className="text-xs font-semibold text-destructive flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> Este KR no cumple estándar mínimo SMART
+            </p>
+          )}
+
           {/* SMART dimensions */}
           <div className="grid grid-cols-5 gap-1.5 text-xs">
             {([
