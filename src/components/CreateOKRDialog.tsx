@@ -518,7 +518,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="gap-2">
+              <Button type="submit" className="gap-2" disabled={Object.values(blockedKRs).some(Boolean)}>
                 <Eye className="w-4 h-4" /> Vista previa
               </Button>
             </div>
