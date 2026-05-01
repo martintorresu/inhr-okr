@@ -77,15 +77,18 @@ const KRReviewButton = ({
     }
     setLoading(true);
     try {
+      const payload = { kr_id, objective, keyResult, cycle, context };
+      console.log("[review-kr] request payload:", payload);
       const { data, error } = await supabase.functions.invoke("review-kr", {
-        body: { kr_id, objective, keyResult, cycle, context },
+        body: payload,
       });
+      console.log("[review-kr] response:", { data, error });
       if (error) throw error;
       const r = data as KRReviewResult;
       setResult(r);
       onResultChange?.(r);
       if (r.blocked) {
-        toast.error("KR bloqueado: revisá los problemas detectados");
+        toast.error("Este KR no cumple estándar mínimo SMART");
       } else {
         toast.success(`KR ${r.level.toLowerCase()} (score ${r.score})`);
       }
