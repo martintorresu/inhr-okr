@@ -266,15 +266,12 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
 
     return json(200, {
       kr_id: payload.kr_id ?? null,
-      model: "google/gemini-3-flash-preview",
       reviewed_at: new Date().toISOString(),
-      review,
-      smart: {
-        dimensions: smartScore,
-        score: Number(score.toFixed(2)),
-        level,
-        blocked,
-      },
+      ai_review: review,
+      smart_score: smartScore,
+      score: Number(score.toFixed(2)),
+      level,
+      blocked,
     });
   } catch (e) {
     console.error("review-kr error", e);
