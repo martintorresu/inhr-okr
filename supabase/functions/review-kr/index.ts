@@ -145,6 +145,26 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
                     type: "string",
                     enum: ["low", "balanced", "stretch", "unrealistic"],
                   },
+                  specific_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Específico': qué tan claro y concreto es el KR.",
+                  },
+                  measurable_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Medible': métrica clara con baseline y target.",
+                  },
+                  achievable_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Alcanzable': realismo según ambition_level (stretch=4, balanced=3, low=2, unrealistic=1).",
+                  },
+                  relevant_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Relevante': alineación con el objetivo padre.",
+                  },
+                  time_bound_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Temporal': plazo definido y acorde al ciclo.",
+                  },
                   strengths: {
                     type: "array",
                     items: { type: "string" },
@@ -177,6 +197,11 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
                   "is_time_bound",
                   "is_aligned",
                   "ambition_level",
+                  "specific_score",
+                  "measurable_score",
+                  "achievable_score",
+                  "relevant_score",
+                  "time_bound_score",
                   "strengths",
                   "issues",
                   "suggestions",
@@ -221,6 +246,11 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       is_time_bound: boolean;
       is_aligned: boolean;
       ambition_level: "low" | "balanced" | "stretch" | "unrealistic";
+      specific_score: number;
+      measurable_score: number;
+      achievable_score: number;
+      relevant_score: number;
+      time_bound_score: number;
       strengths: string[];
       issues: string[];
       suggestions: string[];
@@ -236,14 +266,14 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       return json(502, { error: "Respuesta de IA inválida" });
     }
 
-    // SMART score derivado del análisis de la IA (escala 1-4 por dimensión).
-    // 'achievable' es placeholder hasta que la IA lo evalúe explícitamente (en v2 mapeamos ambition_level).
+    // Clamp 1-4 por dimensión (defensivo: la IA podría devolver 0 o 5).
+    const clamp = (n: number) => Math.max(1, Math.min(4, Math.round(n)));
     const smartScore = {
-      specific: review.is_outcome ? 4 : 2,
-      measurable: review.is_measurable ? 4 : 1,
-      achievable: 3,
-      relevant: review.is_aligned ? 4 : 2,
-      timeBound: review.is_time_bound ? 4 : 1,
+      specific: clamp(review.specific_score),
+      measurable: clamp(review.measurable_score),
+      achievable: clamp(review.achievable_score),
+      relevant: clamp(review.relevant_score),
+      timeBound: clamp(review.time_bound_score),
     };
 
     const score =
