@@ -246,6 +246,11 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       is_time_bound: boolean;
       is_aligned: boolean;
       ambition_level: "low" | "balanced" | "stretch" | "unrealistic";
+      specific_score: number;
+      measurable_score: number;
+      achievable_score: number;
+      relevant_score: number;
+      time_bound_score: number;
       strengths: string[];
       issues: string[];
       suggestions: string[];
@@ -261,14 +266,14 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       return json(502, { error: "Respuesta de IA inválida" });
     }
 
-    // SMART score derivado del análisis de la IA (escala 1-4 por dimensión).
-    // 'achievable' es placeholder hasta que la IA lo evalúe explícitamente (en v2 mapeamos ambition_level).
+    // Clamp 1-4 por dimensión (defensivo: la IA podría devolver 0 o 5).
+    const clamp = (n: number) => Math.max(1, Math.min(4, Math.round(n)));
     const smartScore = {
-      specific: review.is_outcome ? 4 : 2,
-      measurable: review.is_measurable ? 4 : 1,
-      achievable: 3,
-      relevant: review.is_aligned ? 4 : 2,
-      timeBound: review.is_time_bound ? 4 : 1,
+      specific: clamp(review.specific_score),
+      measurable: clamp(review.measurable_score),
+      achievable: clamp(review.achievable_score),
+      relevant: clamp(review.relevant_score),
+      timeBound: clamp(review.time_bound_score),
     };
 
     const score =
