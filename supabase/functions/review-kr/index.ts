@@ -145,6 +145,26 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
                     type: "string",
                     enum: ["low", "balanced", "stretch", "unrealistic"],
                   },
+                  specific_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Específico': qué tan claro y concreto es el KR.",
+                  },
+                  measurable_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Medible': métrica clara con baseline y target.",
+                  },
+                  achievable_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Alcanzable': realismo según ambition_level (stretch=4, balanced=3, low=2, unrealistic=1).",
+                  },
+                  relevant_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Relevante': alineación con el objetivo padre.",
+                  },
+                  time_bound_score: {
+                    type: "number",
+                    description: "Score 1-4 de 'Temporal': plazo definido y acorde al ciclo.",
+                  },
                   strengths: {
                     type: "array",
                     items: { type: "string" },
@@ -177,6 +197,11 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
                   "is_time_bound",
                   "is_aligned",
                   "ambition_level",
+                  "specific_score",
+                  "measurable_score",
+                  "achievable_score",
+                  "relevant_score",
+                  "time_bound_score",
                   "strengths",
                   "issues",
                   "suggestions",
