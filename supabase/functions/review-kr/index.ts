@@ -43,6 +43,7 @@ interface ReviewPayload {
   objective?: string;
   keyResult?: string;
   cycle?: string;
+  source?: "auto" | "manual";
   context?: {
     metric?: string;
     baseline?: number | string;
