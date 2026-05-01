@@ -262,61 +262,63 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       return json(502, { error: "AI no devolvió un análisis estructurado" });
     }
 
-    interface KrReview {
-      overall_score: number;
-      rating: "excellent" | "good" | "needs_work" | "poor";
-      is_outcome: boolean;
-      is_measurable: boolean;
-      is_time_bound: boolean;
-      is_aligned: boolean;
-      ambition_level: "low" | "balanced" | "stretch" | "unrealistic";
-      specific_score: number;
-      measurable_score: number;
-      achievable_score: number;
-      relevant_score: number;
-      time_bound_score: number;
-      strengths: string[];
-      issues: string[];
-      suggestions: string[];
-      improved_kr: string;
-      summary: string;
-    }
-
+    // 1. Parseo + validación runtime con Zod (rechaza shape malformado).
     let review: KrReview;
     try {
-      review = JSON.parse(toolCall.function.arguments) as KrReview;
+      const parsedJson = JSON.parse(toolCall.function.arguments);
+      const parsed = KrReviewSchema.safeParse(parsedJson);
+      if (!parsed.success) {
+        console.error("AI output failed Zod validation", {
+          issues: parsed.error.issues,
+          raw: toolCall.function.arguments,
+        });
+        return json(502, { error: "Respuesta de IA inválida o incompleta" });
+      }
+      review = parsed.data;
     } catch (e) {
       console.error("Failed to parse tool arguments", e, toolCall.function.arguments);
-      return json(502, { error: "Respuesta de IA inválida" });
+      return json(502, { error: "Respuesta de IA inválida o incompleta" });
     }
 
-    // Clamp 1-4 por dimensión (defensivo: la IA podría devolver 0 o 5).
-    const clamp = (n: number) => Math.max(1, Math.min(4, Math.round(n)));
-    const smartScore = {
-      specific: clamp(review.specific_score),
-      measurable: clamp(review.measurable_score),
-      achievable: clamp(review.achievable_score),
-      relevant: clamp(review.relevant_score),
-      timeBound: clamp(review.time_bound_score),
+    // 2. Reconciliación: las flags booleanas y ambition_level actúan como gates duros
+    //    sobre los scores numéricos para evitar inconsistencias del modelo.
+    const clamp14 = (n: number) => Math.max(1, Math.min(4, Math.round(n)));
+
+    const achievableFromAmbition: Record<KrReview["ambition_level"], number> = {
+      unrealistic: 1,
+      low: 2,
+      balanced: 3,
+      stretch: 4,
     };
 
+    const smartScore = {
+      specific:   review.is_outcome    ? clamp14(review.specific_score)   : Math.min(clamp14(review.specific_score), 2),
+      measurable: review.is_measurable ? clamp14(review.measurable_score) : Math.min(clamp14(review.measurable_score), 2),
+      achievable: achievableFromAmbition[review.ambition_level],
+      relevant:   review.is_aligned    ? clamp14(review.relevant_score)   : Math.min(clamp14(review.relevant_score), 2),
+      timeBound:  review.is_time_bound ? clamp14(review.time_bound_score) : Math.min(clamp14(review.time_bound_score), 2),
+    };
+
+    // 3. Score ponderado (S·0.20 + M·0.30 + A·0.15 + R·0.15 + T·0.20).
     const score =
-      smartScore.specific * 0.2 +
-      smartScore.measurable * 0.3 +
+      smartScore.specific   * 0.20 +
+      smartScore.measurable * 0.30 +
       smartScore.achievable * 0.15 +
-      smartScore.relevant * 0.15 +
-      smartScore.timeBound * 0.2;
+      smartScore.relevant   * 0.15 +
+      smartScore.timeBound  * 0.20;
 
+    // 4. Niveles ajustados a la escala 1-4 real (max alcanzable = 4.0).
     let level: "Débil" | "Aceptable" | "Bueno" | "Excelente";
-    if (score < 2.5) level = "Débil";
-    else if (score < 3.5) level = "Aceptable";
-    else if (score < 4.3) level = "Bueno";
-    else level = "Excelente";
+    if      (score < 2.5) level = "Débil";
+    else if (score < 3.3) level = "Aceptable";
+    else if (score < 3.8) level = "Bueno";
+    else                  level = "Excelente";
 
+    // 5. Regla de bloqueo (sin cambios).
     const blocked =
       score < 3 ||
       smartScore.measurable <= 2 ||
-      smartScore.timeBound <= 2;
+      smartScore.timeBound  <= 2;
 
     return json(200, {
       kr_id: payload.kr_id ?? null,
