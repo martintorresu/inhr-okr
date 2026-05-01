@@ -2,6 +2,29 @@
 // v1: opera con el payload recibido (sin DB). Diseñado para enriquecer luego desde Supabase.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
+
+// Runtime schema para el output de la IA. Si la IA devuelve algo distinto, rechazamos con 502.
+const KrReviewSchema = z.object({
+  overall_score: z.number().min(0).max(100),
+  rating: z.enum(["excellent", "good", "needs_work", "poor"]),
+  is_outcome: z.boolean(),
+  is_measurable: z.boolean(),
+  is_time_bound: z.boolean(),
+  is_aligned: z.boolean(),
+  ambition_level: z.enum(["low", "balanced", "stretch", "unrealistic"]),
+  specific_score: z.number().min(1).max(4),
+  measurable_score: z.number().min(1).max(4),
+  achievable_score: z.number().min(1).max(4),
+  relevant_score: z.number().min(1).max(4),
+  time_bound_score: z.number().min(1).max(4),
+  strengths: z.array(z.string()),
+  issues: z.array(z.string()),
+  suggestions: z.array(z.string()),
+  improved_kr: z.string(),
+  summary: z.string(),
+});
+type KrReview = z.infer<typeof KrReviewSchema>;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
