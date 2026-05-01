@@ -21,6 +21,7 @@ import { areas, users as defaultUsers } from "@/data/mockData";
 import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective, KeyResult } from "@/data/mockData";
 import { toast } from "sonner";
+import KRReviewButton from "@/components/KRReviewButton";
 
 interface KRDraft {
   id?: string;
@@ -79,6 +80,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
+  const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (objective && open) {
@@ -93,6 +95,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
       setKeyResults(
         objective.keyResults.length ? objective.keyResults.map(krToDraft) : [emptyKR()]
       );
+      setBlockedKRs({});
     }
   }, [objective, open]);
 
@@ -104,12 +107,28 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const removeKR = (idx: number) => {
     if (keyResults.length <= 1) return;
     setKeyResults(keyResults.filter((_, i) => i !== idx));
+    setBlockedKRs((prev) => {
+      const next: Record<number, boolean> = {};
+      Object.entries(prev).forEach(([k, v]) => {
+        const i = Number(k);
+        if (i < idx) next[i] = v;
+        else if (i > idx) next[i - 1] = v;
+      });
+      return next;
+    });
   };
 
   const updateKR = (idx: number, field: keyof KRDraft, value: string) => {
     const updated = [...keyResults];
     updated[idx] = { ...updated[idx], [field]: value } as KRDraft;
     setKeyResults(updated);
+    if (field === "title") {
+      setBlockedKRs((prev) => {
+        if (!(idx in prev)) return prev;
+        const { [idx]: _omit, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const toggleContributor = (name: string) => {
@@ -453,6 +472,30 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         onChange={(e) => updateKR(idx, "weight", e.target.value)}
                       />
                     </div>
+                    <KRReviewButton
+                      kr_id={kr.id}
+                      objective={title}
+                      keyResult={kr.title}
+                      cycle={cycle}
+                      context={{
+                        metricType: kr.metricType,
+                        initialValue: kr.initialValue,
+                        current: kr.current,
+                        target: kr.target,
+                        direction: kr.direction,
+                        weight: kr.weight,
+                      }}
+                      onApplySuggestion={(improved) => updateKR(idx, "title", improved)}
+                      onResultChange={(r) =>
+                        setBlockedKRs((prev) => {
+                          if (!r) {
+                            const { [idx]: _omit, ...rest } = prev;
+                            return rest;
+                          }
+                          return { ...prev, [idx]: r.blocked };
+                        })
+                      }
+                    />
                   </div>
                   <Button
                     type="button"
@@ -467,6 +510,11 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                 </div>
               ))}
             </div>
+            {Object.values(blockedKRs).some(Boolean) && (
+              <p className="text-xs font-medium text-destructive">
+                Hay KRs bloqueados por la revisión IA. Aplicá las sugerencias o ajustá los KRs antes de guardar.
+              </p>
+            )}
             {totalWeight > 0 && (
               <p
                 className={`text-xs font-medium ${
@@ -482,7 +530,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} className="gap-2">
+            <Button onClick={handleSave} className="gap-2" disabled={Object.values(blockedKRs).some(Boolean)}>
               <Save className="w-4 h-4" /> Guardar cambios
             </Button>
           </div>

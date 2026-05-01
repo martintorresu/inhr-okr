@@ -11,6 +11,7 @@ import { areas, users as defaultUsers } from "@/data/mockData";
 import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
+import KRReviewButton from "@/components/KRReviewButton";
 
 interface KRDraft {
   title: string;
@@ -73,6 +74,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const [extName, setExtName] = useState("");
   const [extEmail, setExtEmail] = useState("");
   const [extPhone, setExtPhone] = useState("");
+  const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
@@ -82,12 +84,28 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const removeKR = (idx: number) => {
     if (keyResults.length <= 1) return;
     setKeyResults(keyResults.filter((_, i) => i !== idx));
+    setBlockedKRs((prev) => {
+      const next: Record<number, boolean> = {};
+      Object.entries(prev).forEach(([k, v]) => {
+        const i = Number(k);
+        if (i < idx) next[i] = v;
+        else if (i > idx) next[i - 1] = v;
+      });
+      return next;
+    });
   };
 
   const updateKR = (idx: number, field: keyof KRDraft, value: string) => {
     const updated = [...keyResults];
     updated[idx] = { ...updated[idx], [field]: value };
     setKeyResults(updated);
+    if (field === "title") {
+      setBlockedKRs((prev) => {
+        if (!(idx in prev)) return prev;
+        const { [idx]: _omit, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const toggleContributor = (name: string) => {
@@ -450,6 +468,28 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
                           onChange={(e) => updateKR(idx, "weight", e.target.value)}
                         />
                       </div>
+                      <KRReviewButton
+                        objective={title}
+                        keyResult={kr.title}
+                        cycle={cycle}
+                        context={{
+                          metricType: kr.metricType,
+                          initialValue: kr.initialValue,
+                          target: kr.target,
+                          direction: kr.direction,
+                          weight: kr.weight,
+                        }}
+                        onApplySuggestion={(improved) => updateKR(idx, "title", improved)}
+                        onResultChange={(r) =>
+                          setBlockedKRs((prev) => {
+                            if (!r) {
+                              const { [idx]: _omit, ...rest } = prev;
+                              return rest;
+                            }
+                            return { ...prev, [idx]: r.blocked };
+                          })
+                        }
+                      />
                     </div>
                     <Button
                       type="button"
@@ -464,6 +504,11 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
                   </div>
                 ))}
               </div>
+              {Object.values(blockedKRs).some(Boolean) && (
+                <p className="text-xs font-medium text-destructive">
+                  Hay KRs bloqueados por la revisión IA. Aplicá las sugerencias o ajustá los KRs antes de continuar.
+                </p>
+              )}
               {totalWeight > 0 && (
                 <p className={`text-xs font-medium ${Math.abs(totalWeight - 100) < 0.01 ? "text-green-600" : "text-destructive"}`}>
                   Suma de pesos: {totalWeight}%
@@ -473,7 +518,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="gap-2">
+              <Button type="submit" className="gap-2" disabled={Object.values(blockedKRs).some(Boolean)}>
                 <Eye className="w-4 h-4" /> Vista previa
               </Button>
             </div>
