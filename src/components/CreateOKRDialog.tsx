@@ -74,6 +74,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const [extName, setExtName] = useState("");
   const [extEmail, setExtEmail] = useState("");
   const [extPhone, setExtPhone] = useState("");
+  const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
