@@ -213,19 +213,68 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       return json(502, { error: "AI no devolvió un análisis estructurado" });
     }
 
-    let review: unknown;
+    interface KrReview {
+      overall_score: number;
+      rating: "excellent" | "good" | "needs_work" | "poor";
+      is_outcome: boolean;
+      is_measurable: boolean;
+      is_time_bound: boolean;
+      is_aligned: boolean;
+      ambition_level: "low" | "balanced" | "stretch" | "unrealistic";
+      strengths: string[];
+      issues: string[];
+      suggestions: string[];
+      improved_kr: string;
+      summary: string;
+    }
+
+    let review: KrReview;
     try {
-      review = JSON.parse(toolCall.function.arguments);
+      review = JSON.parse(toolCall.function.arguments) as KrReview;
     } catch (e) {
       console.error("Failed to parse tool arguments", e, toolCall.function.arguments);
       return json(502, { error: "Respuesta de IA inválida" });
     }
+
+    // SMART score derivado del análisis de la IA (escala 1-4 por dimensión).
+    // 'achievable' es placeholder hasta que la IA lo evalúe explícitamente (en v2 mapeamos ambition_level).
+    const smartScore = {
+      specific: review.is_outcome ? 4 : 2,
+      measurable: review.is_measurable ? 4 : 1,
+      achievable: 3,
+      relevant: review.is_aligned ? 4 : 2,
+      timeBound: review.is_time_bound ? 4 : 1,
+    };
+
+    const score =
+      smartScore.specific * 0.2 +
+      smartScore.measurable * 0.3 +
+      smartScore.achievable * 0.15 +
+      smartScore.relevant * 0.15 +
+      smartScore.timeBound * 0.2;
+
+    let level: "Débil" | "Aceptable" | "Bueno" | "Excelente";
+    if (score < 2.5) level = "Débil";
+    else if (score < 3.5) level = "Aceptable";
+    else if (score < 4.3) level = "Bueno";
+    else level = "Excelente";
+
+    const blocked =
+      score < 3 ||
+      smartScore.measurable <= 2 ||
+      smartScore.timeBound <= 2;
 
     return json(200, {
       kr_id: payload.kr_id ?? null,
       model: "google/gemini-3-flash-preview",
       reviewed_at: new Date().toISOString(),
       review,
+      smart: {
+        dimensions: smartScore,
+        score: Number(score.toFixed(2)),
+        level,
+        blocked,
+      },
     });
   } catch (e) {
     console.error("review-kr error", e);
