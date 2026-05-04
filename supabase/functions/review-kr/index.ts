@@ -334,7 +334,7 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
     const source: "auto" | "manual" = payload.source === "manual" ? "manual" : "auto";
 
     // 6. Persistencia best-effort: nunca debe romper la respuesta principal.
-    if (payload.kr_id) {
+    if (payload.kr_id && supabase && userId) {
       try {
         const { error: insertError } = await supabase
           .from("okr_kr_reviews")
@@ -358,6 +358,8 @@ Devuelve la evaluación usando la herramienta 'submit_kr_review'.`;
       } catch (e) {
         console.error("Persistencia falló", e);
       }
+    } else if (!userId) {
+      console.warn("Persistencia omitida: sesión anónima (tenant demo)");
     } else {
       console.warn("Persistencia omitida: payload.kr_id no provisto");
     }
