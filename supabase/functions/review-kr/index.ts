@@ -75,28 +75,30 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
-  // Auth (verify_jwt = true ya valida, pero confirmamos el claim)
+  // Auth opcional: tenants reales envían JWT y persistimos; demo (quimetal) no envía y respondemos igual.
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return json(401, { error: "Unauthorized" });
-  }
-  let supabase;
-  let userId: string;
-  try {
-    supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claims?.claims?.sub) {
-      return json(401, { error: "Unauthorized" });
+  let supabase: ReturnType<typeof createClient> | null = null;
+  let userId: string | null = null;
+  if (authHeader?.startsWith("Bearer ")) {
+    try {
+      supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claims, error: claimsError } = await supabase.auth.getClaims(token);
+      if (!claimsError && claims?.claims?.sub) {
+        userId = claims.claims.sub as string;
+      } else {
+        // JWT presente pero inválido → tratar como anónimo (no persistir).
+        console.warn("Auth opcional: JWT inválido, continuando sin persistencia");
+        supabase = null;
+      }
+    } catch (e) {
+      console.warn("Auth opcional: error verificando JWT, continuando sin persistencia", e);
+      supabase = null;
     }
-    userId = claims.claims.sub as string;
-  } catch (e) {
-    console.error("Auth error", e);
-    return json(401, { error: "Unauthorized" });
   }
 
   // Parse payload
