@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Objective } from "@/data/mockData";
+import type { Objective, KeyResult } from "@/data/types";
+import { computeKRProgress, computeObjectiveProgress } from "@/lib/okrProgress";
 
 const table = () => (supabase as any).from("okr_objectives");
 
