@@ -1,10 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   AlertTriangle, Sparkles, TrendingUp, TrendingDown, Minus, Loader2,
-  Target, Users, ShieldAlert, Activity,
+  Target, Users, ShieldAlert, Activity, Flame,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,14 +23,22 @@ interface Props {
 }
 
 type KRStatus = "on_track" | "at_risk" | "critical" | "overdue";
+type Weight = "high" | "medium" | "low";
 
 const STALE_DAYS = 14;
+const WEIGHTS_KEY = "okr-kr-weights-v1";
 
 const statusMeta: Record<KRStatus, { label: string; cls: string }> = {
   on_track: { label: "On track", cls: "bg-success/15 text-success border-success/30" },
   at_risk: { label: "En riesgo", cls: "bg-warning/15 text-warning border-warning/30" },
   critical: { label: "Crítico", cls: "bg-danger/15 text-danger border-danger/30" },
   overdue: { label: "Atrasado", cls: "bg-danger/15 text-danger border-danger/30" },
+};
+
+const weightMeta: Record<Weight, { label: string; short: string; cls: string; rank: number }> = {
+  high:   { label: "Alto impacto",  short: "Alto",  cls: "bg-primary/15 text-primary border-primary/30", rank: 0 },
+  medium: { label: "Medio impacto", short: "Medio", cls: "bg-muted text-foreground border-border", rank: 1 },
+  low:    { label: "Bajo impacto",  short: "Bajo",  cls: "bg-muted/50 text-muted-foreground border-border", rank: 2 },
 };
 
 const daysSince = (iso?: string | null): number | null => {
@@ -37,21 +48,31 @@ const daysSince = (iso?: string | null): number | null => {
   return Math.floor((Date.now() - d) / 86_400_000);
 };
 
+const loadWeights = (): Record<string, Weight> => {
+  try {
+    const raw = localStorage.getItem(WEIGHTS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+};
+
 const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Props) => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSummary, setAiSummary] = useState<string>("");
+  const [weights, setWeights] = useState<Record<string, Weight>>(() => loadWeights());
+
+  useEffect(() => {
+    try { localStorage.setItem(WEIGHTS_KEY, JSON.stringify(weights)); } catch { /* noop */ }
+  }, [weights]);
+
+  const setKRWeight = (krId: string, w: Weight) =>
+    setWeights((prev) => ({ ...prev, [krId]: w }));
 
   // ============= Derived data =============
   const data = useMemo(() => {
-    // index check-ins by KR (latest first)
     const ciByKR: Record<string, CheckInRecord[]> = {};
-    const ciByObj: Record<string, CheckInRecord[]> = {};
     [...checkIns]
       .sort((a, b) => b.checkinDate.localeCompare(a.checkinDate))
-      .forEach((c) => {
-        if (c.krId) (ciByKR[c.krId] ||= []).push(c);
-        (ciByObj[c.objectiveId] ||= []).push(c);
-      });
+      .forEach((c) => { if (c.krId) (ciByKR[c.krId] ||= []).push(c); });
 
     const schedByKR: Record<string, CheckInSchedule> = {};
     schedules.forEach((s) => { if (s.krId) schedByKR[s.krId] = s; });
@@ -63,6 +84,7 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
       kr: KeyResult;
       obj: Objective;
       status: KRStatus;
+      weight: Weight;
       daysSinceCheckin: number | null;
       lastConfidence: Confidence;
       blockedInitiatives: number;
@@ -88,22 +110,21 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
         else if (lastConf === "yellow" || (kr.progress ?? 0) < 50) status = "at_risk";
         else status = "on_track";
 
-        // consecutive red cycles
         let consecutiveRedCycles = 0;
         for (const c of cis) {
           if (c.confidence === "red") consecutiveRedCycles++;
           else break;
         }
 
-        // stagnant: 2+ check-ins without progress improvement
         let stagnant = false;
         if (cis.length >= 2 && cis[0].progressManual <= cis[1].progressManual) stagnant = true;
 
         const inis = initByKR[kr.id] ?? [];
         const blockedInitiatives = inis.filter((i) => i.status === "blocked").length;
+        const weight: Weight = weights[kr.id] ?? "medium";
 
         krRows.push({
-          kr, obj, status, daysSinceCheckin: ds, lastConfidence: lastConf,
+          kr, obj, status, weight, daysSinceCheckin: ds, lastConfidence: lastConf,
           blockedInitiatives, consecutiveRedCycles, stagnant,
         });
       });
@@ -131,15 +152,30 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
       return { obj, counts, avg, color, totalKRs: rows.length };
     });
 
-    // ===== Top KRs at risk =====
+    // ===== Top KRs at risk (sort: weight first, then status, then progress) =====
+    const statusOrder: Record<KRStatus, number> = { critical: 0, overdue: 1, at_risk: 2, on_track: 3 };
     const risky = krRows
       .filter((r) => r.status === "critical" || r.status === "at_risk" || r.status === "overdue")
       .sort((a, b) => {
-        const order: Record<KRStatus, number> = { critical: 0, overdue: 1, at_risk: 2, on_track: 3 };
-        if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+        if (weightMeta[a.weight].rank !== weightMeta[b.weight].rank)
+          return weightMeta[a.weight].rank - weightMeta[b.weight].rank;
+        if (statusOrder[a.status] !== statusOrder[b.status])
+          return statusOrder[a.status] - statusOrder[b.status];
         return (a.kr.progress ?? 0) - (b.kr.progress ?? 0);
       })
       .slice(0, 5);
+
+    // ===== Focos críticos del negocio: top 3 críticos de mayor impacto =====
+    const focos = krRows
+      .filter((r) => r.status === "critical" || (r.weight === "high" && r.status !== "on_track"))
+      .sort((a, b) => {
+        if (weightMeta[a.weight].rank !== weightMeta[b.weight].rank)
+          return weightMeta[a.weight].rank - weightMeta[b.weight].rank;
+        if (statusOrder[a.status] !== statusOrder[b.status])
+          return statusOrder[a.status] - statusOrder[b.status];
+        return (a.kr.progress ?? 0) - (b.kr.progress ?? 0);
+      })
+      .slice(0, 3);
 
     // ===== Leaders ranking =====
     const ownersMap: Record<string, { krs: typeof krRows; checkInsCount: number }> = {};
@@ -157,38 +193,44 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
       const critical = v.krs.filter((r) => r.status === "critical").length;
       const pctOnTrack = Math.round((onTrack / total) * 100);
       const pctCritical = Math.round((critical / total) * 100);
-      // score: on_track positivo, critical negativo, ponderado por # check-ins
-      const checkinDensity = v.checkInsCount / total; // promedio
+      const checkinDensity = v.checkInsCount / total;
       const score = Math.max(0, Math.min(100, Math.round(pctOnTrack - pctCritical * 1.5 + checkinDensity * 5)));
       return { owner, totalKRs: v.krs.length, pctOnTrack, pctCritical, checkinDensity, score };
     }).sort((a, b) => b.score - a.score);
 
-    // ===== Alerts =====
-    const alerts: { type: string; severity: "high" | "medium"; message: string }[] = [];
+    // ===== Alerts (high-impact críticos primero) =====
+    const alerts: { type: string; severity: "high" | "medium"; message: string; weight: Weight }[] = [];
     krRows.forEach((r) => {
+      const tag = r.weight === "high" ? "⚡ Alto impacto · " : "";
       if (r.daysSinceCheckin !== null && r.daysSinceCheckin > STALE_DAYS) {
         alerts.push({
-          type: "stale", severity: "medium",
-          message: `${r.kr.title} sin check-in hace ${r.daysSinceCheckin} días (${r.obj.owner})`,
+          type: "stale", severity: r.weight === "high" ? "high" : "medium", weight: r.weight,
+          message: `${tag}${r.kr.title} sin check-in hace ${r.daysSinceCheckin} días (${r.obj.owner})`,
         });
       } else if (r.daysSinceCheckin === null) {
         alerts.push({
-          type: "no-checkin", severity: "medium",
-          message: `${r.kr.title} aún no tiene check-ins (${r.obj.owner})`,
+          type: "no-checkin", severity: r.weight === "high" ? "high" : "medium", weight: r.weight,
+          message: `${tag}${r.kr.title} aún no tiene check-ins (${r.obj.owner})`,
         });
       }
       if (r.consecutiveRedCycles >= 2) {
         alerts.push({
-          type: "red-streak", severity: "high",
-          message: `${r.kr.title} en rojo por ${r.consecutiveRedCycles} ciclos consecutivos`,
+          type: "red-streak", severity: "high", weight: r.weight,
+          message: `${tag}${r.kr.title} en rojo por ${r.consecutiveRedCycles} ciclos consecutivos`,
         });
       }
       if (r.stagnant && r.status !== "on_track") {
         alerts.push({
-          type: "stagnant", severity: "medium",
-          message: `${r.kr.title} estancado (sin avance entre últimos check-ins)`,
+          type: "stagnant", severity: r.weight === "high" ? "high" : "medium", weight: r.weight,
+          message: `${tag}${r.kr.title} estancado (sin avance entre últimos check-ins)`,
         });
       }
+    });
+    // ordenar: high-impact + high severity primero
+    alerts.sort((a, b) => {
+      const aImp = (a.weight === "high" ? 0 : 2) + (a.severity === "high" ? 0 : 1);
+      const bImp = (b.weight === "high" ? 0 : 2) + (b.severity === "high" ? 0 : 1);
+      return aImp - bImp;
     });
 
     // ===== Global indicators =====
@@ -201,42 +243,49 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
       avgProgress: krRows.length
         ? Math.round(krRows.reduce((s, r) => s + (r.kr.progress ?? 0), 0) / krRows.length)
         : 0,
+      highImpactCount: krRows.filter((r) => r.weight === "high").length,
+      highImpactCritical: krRows.filter((r) => r.weight === "high" && r.status === "critical").length,
     };
 
-    // ===== Blockers breakdown =====
     const blockerCounts: Record<string, number> = {};
     checkIns.forEach((c) => {
-      c.blockers.forEach((b) => {
-        blockerCounts[b.type] = (blockerCounts[b.type] ?? 0) + 1;
-      });
+      c.blockers.forEach((b) => { blockerCounts[b.type] = (blockerCounts[b.type] ?? 0) + 1; });
     });
 
-    return { objSummaries, risky, leaders, alerts: alerts.slice(0, 10), globals, blockerCounts, krRows };
-  }, [objectives, initiatives, checkIns, schedules]);
+    return { objSummaries, risky, focos, leaders, alerts: alerts.slice(0, 10), globals, blockerCounts, krRows };
+  }, [objectives, initiatives, checkIns, schedules, weights]);
 
   const generateAISummary = async () => {
     setAiLoading(true);
     try {
-      // areas with highest critical concentration
-      const areaStats: Record<string, { total: number; critical: number; atRisk: number }> = {};
+      const areaStats: Record<string, { total: number; critical: number; atRisk: number; highImpactCritical: number }> = {};
       data.krRows.forEach((r) => {
         const a = r.obj.area || "—";
-        const s = (areaStats[a] ||= { total: 0, critical: 0, atRisk: 0 });
+        const s = (areaStats[a] ||= { total: 0, critical: 0, atRisk: 0, highImpactCritical: 0 });
         s.total += 1;
         if (r.status === "critical") s.critical += 1;
         if (r.status === "at_risk" || r.status === "overdue") s.atRisk += 1;
+        if (r.weight === "high" && r.status === "critical") s.highImpactCritical += 1;
       });
 
       const payload = {
+        instruction:
+          "Prioriza qué resolver primero. Pondera SIEMPRE por peso estratégico: un KR de alto impacto en riesgo importa más que uno de bajo impacto crítico. Responde 'qué debo resolver primero', no 'qué está mal'.",
         globals: data.globals,
         topAreasAtRisk: Object.entries(areaStats)
           .map(([area, s]) => ({ area, ...s, pctCritical: Math.round((s.critical / s.total) * 100) }))
-          .sort((a, b) => b.pctCritical - a.pctCritical)
+          .sort((a, b) => b.highImpactCritical - a.highImpactCritical || b.pctCritical - a.pctCritical)
           .slice(0, 5),
-        topRiskyKRs: data.risky.slice(0, 5).map((r) => ({
+        focosCriticos: data.focos.map((r) => ({
           kr: r.kr.title, owner: r.obj.owner, area: r.obj.area,
           progress: r.kr.progress, status: r.status,
+          weight: r.weight, impact: weightMeta[r.weight].label,
           daysSinceCheckin: r.daysSinceCheckin,
+        })),
+        topRiskyKRs: data.risky.map((r) => ({
+          kr: r.kr.title, owner: r.obj.owner, area: r.obj.area,
+          progress: r.kr.progress, status: r.status,
+          weight: r.weight, daysSinceCheckin: r.daysSinceCheckin,
         })),
         blockerCounts: data.blockerCounts,
         leadersBottom3: [...data.leaders].sort((a, b) => a.score - b.score).slice(0, 3),
@@ -255,10 +304,21 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
   };
 
   const colorRing: Record<"green" | "yellow" | "red", string> = {
-    green: "bg-success",
-    yellow: "bg-warning",
-    red: "bg-danger",
+    green: "bg-success", yellow: "bg-warning", red: "bg-danger",
   };
+
+  const WeightSelect = ({ krId, value }: { krId: string; value: Weight }) => (
+    <Select value={value} onValueChange={(v) => setKRWeight(krId, v as Weight)}>
+      <SelectTrigger className="h-6 w-[88px] text-[11px] px-2">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="high">Alto</SelectItem>
+        <SelectItem value="medium">Medio</SelectItem>
+        <SelectItem value="low">Bajo</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
   return (
     <div className="space-y-6">
@@ -269,6 +329,48 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
         <KpiCard icon={<ShieldAlert className="w-4 h-4" />} label="Críticos" value={`${data.globals.pctCritical}%`} tone="danger" />
         <KpiCard icon={<Target className="w-4 h-4" />} label="Cumplimiento promedio" value={`${data.globals.avgProgress}%`} tone="primary" />
       </div>
+
+      {/* ===== Focos críticos del negocio ===== */}
+      <Card className="border-danger/30 bg-danger/[0.03]">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Flame className="w-4 h-4 text-danger" /> Focos críticos del negocio
+            <span className="text-xs font-normal text-muted-foreground ml-1">
+              · Qué resolver primero
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {data.focos.length === 0 && (
+            <p className="text-sm text-muted-foreground">Sin focos críticos de alto impacto. ✅</p>
+          )}
+          {data.focos.map((r, i) => (
+            <div key={r.kr.id} className="flex items-start gap-3 p-3 rounded-lg border border-danger/20 bg-card">
+              <div className="w-7 h-7 rounded-full bg-danger/15 text-danger flex items-center justify-center text-sm font-bold shrink-0">
+                {i + 1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-foreground truncate">{r.kr.title}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {r.obj.owner} · {r.obj.area}
+                  {" · "}
+                  {r.daysSinceCheckin !== null
+                    ? `${r.daysSinceCheckin}d sin avance`
+                    : "sin check-ins"}
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <Badge variant="outline" className={`${statusMeta[r.status].cls} text-xs`}>
+                  {statusMeta[r.status].label}
+                </Badge>
+                <Badge variant="outline" className={`${weightMeta[r.weight].cls} text-[10px]`}>
+                  {weightMeta[r.weight].short}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       {/* ===== Resumen IA ===== */}
       <Card>
@@ -286,7 +388,7 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
             <div className="text-sm whitespace-pre-line text-foreground/90 leading-relaxed">{aiSummary}</div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Genera un resumen de 30 segundos con IA: dónde está el problema, quién es responsable y qué hacer.
+              Pondera por peso estratégico y responde qué resolver primero, no solo qué está mal.
             </p>
           )}
         </CardContent>
@@ -323,17 +425,20 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
           </CardContent>
         </Card>
 
-        {/* ===== Ranking KRs en riesgo ===== */}
+        {/* ===== Ranking KRs en riesgo (con peso) ===== */}
         <Card>
           <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-warning" /> Top KRs en riesgo
+            <span className="text-xs font-normal text-muted-foreground ml-1">· por peso estratégico</span>
           </CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {data.risky.length === 0 && (
               <p className="text-sm text-muted-foreground">Ningún KR en riesgo. 🎉</p>
             )}
             {data.risky.map((r) => (
-              <div key={r.kr.id} className="flex items-start gap-3 p-3 rounded-lg border border-border">
+              <div key={r.kr.id} className={`flex items-start gap-3 p-3 rounded-lg border ${
+                r.weight === "high" ? "border-primary/30 bg-primary/[0.03]" : "border-border"
+              }`}>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-foreground truncate">{r.kr.title}</div>
                   <div className="text-xs text-muted-foreground">
@@ -344,10 +449,13 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <Badge variant="outline" className={`${statusMeta[r.status].cls} text-xs`}>
-                    {statusMeta[r.status].label}
-                  </Badge>
-                  <span className="text-xs font-medium tabular-nums">{r.kr.progress ?? 0}%</span>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="outline" className={`${statusMeta[r.status].cls} text-xs`}>
+                      {statusMeta[r.status].label}
+                    </Badge>
+                    <span className="text-xs font-medium tabular-nums">{r.kr.progress ?? 0}%</span>
+                  </div>
+                  <WeightSelect krId={r.kr.id} value={r.weight} />
                 </div>
               </div>
             ))}
@@ -395,19 +503,53 @@ const ExecutiveDashboard = ({ objectives, initiatives, checkIns, schedules }: Pr
             {data.alerts.length === 0 && (
               <p className="text-sm text-muted-foreground">Sin alertas activas.</p>
             )}
-            {data.alerts.map((a, i) => (
-              <div key={i} className={`flex items-start gap-2 p-2.5 rounded-lg border text-sm ${
-                a.severity === "high"
-                  ? "border-danger/30 bg-danger/5 text-danger"
-                  : "border-warning/30 bg-warning/5 text-warning-foreground"
-              }`}>
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="text-foreground/90">{a.message}</span>
-              </div>
-            ))}
+            {data.alerts.map((a, i) => {
+              const isHighImpact = a.weight === "high";
+              return (
+                <div key={i} className={`flex items-start gap-2 p-2.5 rounded-lg border text-sm ${
+                  isHighImpact
+                    ? "border-danger/40 bg-danger/10"
+                    : a.severity === "high"
+                      ? "border-danger/30 bg-danger/5"
+                      : "border-warning/30 bg-warning/5"
+                }`}>
+                  <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${isHighImpact ? "text-danger" : a.severity === "high" ? "text-danger" : "text-warning"}`} />
+                  <span className="text-foreground/90">{a.message}</span>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
+
+      {/* ===== Gestión de pesos ===== */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Flame className="w-4 h-4" /> Peso estratégico de KRs
+            <span className="text-xs font-normal text-muted-foreground ml-1">
+              · Define qué importa más al negocio
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1.5 max-h-80 overflow-auto">
+          {data.krRows.length === 0 && (
+            <p className="text-sm text-muted-foreground">Sin KRs.</p>
+          )}
+          {data.krRows.map((r) => (
+            <div key={r.kr.id} className="flex items-center gap-3 p-2 rounded border border-border/50 hover:bg-muted/30">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-foreground truncate">{r.kr.title}</div>
+                <div className="text-[11px] text-muted-foreground">{r.obj.owner} · {r.obj.area}</div>
+              </div>
+              <Badge variant="outline" className={`${statusMeta[r.status].cls} text-[10px]`}>
+                {statusMeta[r.status].label}
+              </Badge>
+              <WeightSelect krId={r.kr.id} value={r.weight} />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 };
