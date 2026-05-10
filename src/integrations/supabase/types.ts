@@ -106,6 +106,7 @@ export type Database = {
           created_at: string
           frequency: string
           id: string
+          kr_id: string | null
           last_generated_at: string | null
           next_due_date: string | null
           objective_id: string
@@ -116,6 +117,7 @@ export type Database = {
           created_at?: string
           frequency?: string
           id: string
+          kr_id?: string | null
           last_generated_at?: string | null
           next_due_date?: string | null
           objective_id: string
@@ -126,6 +128,7 @@ export type Database = {
           created_at?: string
           frequency?: string
           id?: string
+          kr_id?: string | null
           last_generated_at?: string | null
           next_due_date?: string | null
           objective_id?: string
