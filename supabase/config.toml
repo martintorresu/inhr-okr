@@ -7,3 +7,5 @@ project_id = "nlpczneghixtbwtsrqxl"
     verify_jwt = true
   [functions.review-kr]
     verify_jwt = false
+  [functions.exec-summary]
+    verify_jwt = false
