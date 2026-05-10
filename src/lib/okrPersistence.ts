@@ -65,3 +65,40 @@ export const replaceTenantObjectives = async (tenantId: string, objectives: Obje
     })
   );
 };
+
+/**
+ * Updates a single KR's `current` value inside an objective.
+ * Recomputes per-KR and objective-level progress, persists the row,
+ * and returns the updated Objective for caller-side state refresh.
+ */
+export const updateKRCurrent = async (
+  tenantId: string,
+  objectiveId: string,
+  krId: string,
+  current: number
+): Promise<Objective | null> => {
+  const { data, error } = await table()
+    .select("*")
+    .eq("tenant_id", tenantId)
+    .eq("id", objectiveId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const obj = normalizeObjective(data);
+  const nextKRs: KeyResult[] = obj.keyResults.map((kr) => {
+    if (kr.id !== krId) return kr;
+    const updated: KeyResult = { ...kr, current };
+    updated.progress = computeKRProgress(updated);
+    return updated;
+  });
+  const nextObj: Objective = {
+    ...obj,
+    keyResults: nextKRs,
+    progress: computeObjectiveProgress({ ...obj, keyResults: nextKRs }),
+  };
+
+  const { error: upErr } = await table().upsert(toRow(tenantId, nextObj), { onConflict: "id" });
+  if (upErr) throw upErr;
+  return nextObj;
+};
