@@ -103,7 +103,7 @@ const CheckInsPage = ({
   objectives, initiatives, team, checkIns, isAdmin, currentUserName, currentUserId,
   onUpsert, onDelete, schedules, onScheduleUpsert, onInitiativeUpsert, onUpdateKR,
 }: CheckInsPageProps) => {
-  const [tab, setTab] = useState<"por-kr" | "individual" | "admin">("por-kr");
+  const [tab, setTab] = useState<"exec" | "por-kr" | "individual" | "admin">("exec");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
   const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
