@@ -208,14 +208,24 @@ const CheckInsPage = ({
         </Button>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "por-kr" | "individual" | "admin")}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "exec" | "por-kr" | "individual" | "admin")}>
         <TabsList>
+          <TabsTrigger value="exec">Dashboard Ejecutivo</TabsTrigger>
           <TabsTrigger value="por-kr">Por KR</TabsTrigger>
           <TabsTrigger value="individual">Mi vista</TabsTrigger>
           <TabsTrigger value="admin" disabled={!isAdmin} className="gap-2">
             <ShieldCheck className="w-3.5 h-3.5" /> Vista equipo
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="exec" className="mt-4">
+          <ExecutiveDashboard
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+          />
+        </TabsContent>
 
         <TabsContent value="por-kr" className="mt-4">
           <KRCheckinsPanel
