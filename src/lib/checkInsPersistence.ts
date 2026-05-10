@@ -153,6 +153,7 @@ export type Frequency = "weekly" | "biweekly" | "monthly";
 export interface CheckInSchedule {
   id: string;
   objectiveId: string;
+  krId?: string | null;
   frequency: Frequency;
   nextDueDate: string | null;
   lastGeneratedAt: string | null;
@@ -166,6 +167,7 @@ export const loadTenantSchedules = async (tenantId: string): Promise<CheckInSche
   return (data ?? []).map((r: any) => ({
     id: r.id,
     objectiveId: r.objective_id,
+    krId: r.kr_id ?? null,
     frequency: (r.frequency ?? "biweekly") as Frequency,
     nextDueDate: r.next_due_date ?? null,
     lastGeneratedAt: r.last_generated_at ?? null,
@@ -178,6 +180,7 @@ export const upsertSchedule = async (tenantId: string, s: CheckInSchedule) => {
       id: s.id,
       tenant_id: tenantId,
       objective_id: s.objectiveId,
+      kr_id: s.krId ?? null,
       frequency: s.frequency,
       next_due_date: s.nextDueDate,
       last_generated_at: s.lastGeneratedAt,

@@ -13,7 +13,7 @@ import LoginPage from "@/components/LoginPage";
 import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
-import { loadTenantObjectives, replaceTenantObjectives } from "@/lib/okrPersistence";
+import { loadTenantObjectives, replaceTenantObjectives, updateKRCurrent } from "@/lib/okrPersistence";
 import {
   loadTenantInitiatives,
   upsertInitiative,
@@ -220,10 +220,16 @@ const Index = () => {
   const handleScheduleUpsert = async (s: CheckInSchedule) => {
     await upsertSchedule(activeTenantId, s);
     setSchedules((prev) => {
-      const idx = prev.findIndex((p) => p.objectiveId === s.objectiveId);
+      const idx = prev.findIndex((p) => p.id === s.id);
       if (idx === -1) return [...prev, s];
       const next = [...prev]; next[idx] = s; return next;
     });
+  };
+
+  const handleUpdateKR = async (objectiveId: string, krId: string, current: number) => {
+    const updated = await updateKRCurrent(activeTenantId, objectiveId, krId, current);
+    if (!updated) return;
+    setObjectives((prev) => prev.map((o) => (o.id === objectiveId ? updated : o)));
   };
 
   const renderPage = () => {
@@ -260,6 +266,8 @@ const Index = () => {
             onDelete={handleCheckInDelete}
             schedules={schedules}
             onScheduleUpsert={handleScheduleUpsert}
+            onInitiativeUpsert={handleInitiativeUpsert}
+            onUpdateKR={handleUpdateKR}
           />
         );
       case "team":

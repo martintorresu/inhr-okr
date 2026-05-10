@@ -16,6 +16,7 @@ import {
   Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
 } from "lucide-react";
 import CheckInTimeline from "@/components/CheckInTimeline";
+import KRCheckinsPanel from "@/components/KRCheckinsPanel";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
@@ -38,6 +39,8 @@ interface CheckInsPageProps {
   onDelete: (id: string) => Promise<void>;
   schedules: CheckInSchedule[];
   onScheduleUpsert: (s: CheckInSchedule) => Promise<void>;
+  onInitiativeUpsert: (ini: InitiativeWithContext) => Promise<void>;
+  onUpdateKR: (objectiveId: string, krId: string, current: number) => Promise<void>;
 }
 
 const confidenceMeta: Record<Confidence, { label: string; cls: string }> = {
@@ -97,9 +100,9 @@ const emptyDraft = (objectiveId: string, authorName: string, authorUserId?: stri
 
 const CheckInsPage = ({
   objectives, initiatives, team, checkIns, isAdmin, currentUserName, currentUserId,
-  onUpsert, onDelete, schedules, onScheduleUpsert,
+  onUpsert, onDelete, schedules, onScheduleUpsert, onInitiativeUpsert, onUpdateKR,
 }: CheckInsPageProps) => {
-  const [tab, setTab] = useState<"individual" | "admin">("individual");
+  const [tab, setTab] = useState<"por-kr" | "individual" | "admin">("por-kr");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
   const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
@@ -204,13 +207,29 @@ const CheckInsPage = ({
         </Button>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "individual" | "admin")}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "por-kr" | "individual" | "admin")}>
         <TabsList>
+          <TabsTrigger value="por-kr">Por KR</TabsTrigger>
           <TabsTrigger value="individual">Mi vista</TabsTrigger>
           <TabsTrigger value="admin" disabled={!isAdmin} className="gap-2">
             <ShieldCheck className="w-3.5 h-3.5" /> Vista equipo
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="por-kr" className="mt-4">
+          <KRCheckinsPanel
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+            currentUserName={currentUserName}
+            currentUserId={currentUserId}
+            onUpsertCheckIn={onUpsert}
+            onUpsertInitiative={onInitiativeUpsert}
+            onUpsertSchedule={onScheduleUpsert}
+            onUpdateKR={onUpdateKR}
+          />
+        </TabsContent>
 
         <TabsContent value="individual" className="mt-4 space-y-3">
           {myCheckIns.length === 0 && (
