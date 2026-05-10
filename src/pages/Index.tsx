@@ -13,7 +13,7 @@ import LoginPage from "@/components/LoginPage";
 import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
-import { loadTenantObjectives, replaceTenantObjectives } from "@/lib/okrPersistence";
+import { loadTenantObjectives, replaceTenantObjectives, updateKRCurrent } from "@/lib/okrPersistence";
 import {
   loadTenantInitiatives,
   upsertInitiative,
