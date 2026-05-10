@@ -100,9 +100,9 @@ const emptyDraft = (objectiveId: string, authorName: string, authorUserId?: stri
 
 const CheckInsPage = ({
   objectives, initiatives, team, checkIns, isAdmin, currentUserName, currentUserId,
-  onUpsert, onDelete, schedules, onScheduleUpsert,
+  onUpsert, onDelete, schedules, onScheduleUpsert, onInitiativeUpsert, onUpdateKR,
 }: CheckInsPageProps) => {
-  const [tab, setTab] = useState<"individual" | "admin">("individual");
+  const [tab, setTab] = useState<"por-kr" | "individual" | "admin">("por-kr");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
   const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
