@@ -16,6 +16,7 @@ import {
   Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
 } from "lucide-react";
 import CheckInTimeline from "@/components/CheckInTimeline";
+import KRCheckinsPanel from "@/components/KRCheckinsPanel";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
@@ -38,6 +39,8 @@ interface CheckInsPageProps {
   onDelete: (id: string) => Promise<void>;
   schedules: CheckInSchedule[];
   onScheduleUpsert: (s: CheckInSchedule) => Promise<void>;
+  onInitiativeUpsert: (ini: InitiativeWithContext) => Promise<void>;
+  onUpdateKR: (objectiveId: string, krId: string, current: number) => Promise<void>;
 }
 
 const confidenceMeta: Record<Confidence, { label: string; cls: string }> = {
