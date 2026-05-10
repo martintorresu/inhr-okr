@@ -266,6 +266,8 @@ const Index = () => {
             onDelete={handleCheckInDelete}
             schedules={schedules}
             onScheduleUpsert={handleScheduleUpsert}
+            onInitiativeUpsert={handleInitiativeUpsert}
+            onUpdateKR={handleUpdateKR}
           />
         );
       case "team":
