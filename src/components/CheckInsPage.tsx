@@ -207,13 +207,29 @@ const CheckInsPage = ({
         </Button>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "individual" | "admin")}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "por-kr" | "individual" | "admin")}>
         <TabsList>
+          <TabsTrigger value="por-kr">Por KR</TabsTrigger>
           <TabsTrigger value="individual">Mi vista</TabsTrigger>
           <TabsTrigger value="admin" disabled={!isAdmin} className="gap-2">
             <ShieldCheck className="w-3.5 h-3.5" /> Vista equipo
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="por-kr" className="mt-4">
+          <KRCheckinsPanel
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+            currentUserName={currentUserName}
+            currentUserId={currentUserId}
+            onUpsertCheckIn={onUpsert}
+            onUpsertInitiative={onInitiativeUpsert}
+            onUpsertSchedule={onScheduleUpsert}
+            onUpdateKR={onUpdateKR}
+          />
+        </TabsContent>
 
         <TabsContent value="individual" className="mt-4 space-y-3">
           {myCheckIns.length === 0 && (
