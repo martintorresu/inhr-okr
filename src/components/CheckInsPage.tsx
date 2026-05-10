@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import CheckInTimeline from "@/components/CheckInTimeline";
 import KRCheckinsPanel from "@/components/KRCheckinsPanel";
+import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
@@ -102,7 +103,7 @@ const CheckInsPage = ({
   objectives, initiatives, team, checkIns, isAdmin, currentUserName, currentUserId,
   onUpsert, onDelete, schedules, onScheduleUpsert, onInitiativeUpsert, onUpdateKR,
 }: CheckInsPageProps) => {
-  const [tab, setTab] = useState<"por-kr" | "individual" | "admin">("por-kr");
+  const [tab, setTab] = useState<"exec" | "por-kr" | "individual" | "admin">("exec");
   const [editor, setEditor] = useState<{ open: boolean; draft: CheckInRecord | null }>({ open: false, draft: null });
   const [filterRisk, setFilterRisk] = useState<"all" | Confidence>("all");
   const [timelineObj, setTimelineObj] = useState<Objective | null>(null);
@@ -207,14 +208,24 @@ const CheckInsPage = ({
         </Button>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as "por-kr" | "individual" | "admin")}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "exec" | "por-kr" | "individual" | "admin")}>
         <TabsList>
+          <TabsTrigger value="exec">Dashboard Ejecutivo</TabsTrigger>
           <TabsTrigger value="por-kr">Por KR</TabsTrigger>
           <TabsTrigger value="individual">Mi vista</TabsTrigger>
           <TabsTrigger value="admin" disabled={!isAdmin} className="gap-2">
             <ShieldCheck className="w-3.5 h-3.5" /> Vista equipo
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="exec" className="mt-4">
+          <ExecutiveDashboard
+            objectives={objectives}
+            initiatives={initiatives}
+            checkIns={checkIns}
+            schedules={schedules}
+          />
+        </TabsContent>
 
         <TabsContent value="por-kr" className="mt-4">
           <KRCheckinsPanel
