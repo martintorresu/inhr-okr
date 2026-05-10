@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import CheckInTimeline from "@/components/CheckInTimeline";
 import KRCheckinsPanel from "@/components/KRCheckinsPanel";
+import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import { toast } from "sonner";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
