@@ -55,6 +55,7 @@ export interface Task {
   id: string;
   title: string;
   completed: boolean;
+  responsible?: string;
 }
 
 export interface CheckIn {
