@@ -170,6 +170,13 @@ const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: 
     setForm((f) => ({ ...f, tasks: f.tasks.filter((t) => t.id !== id) }));
   };
 
+  const setTaskResponsible = (id: string, responsible: string) => {
+    setForm((f) => ({
+      ...f,
+      tasks: f.tasks.map((t) => (t.id === id ? { ...t, responsible } : t)),
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
