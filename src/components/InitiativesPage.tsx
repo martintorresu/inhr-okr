@@ -356,7 +356,13 @@ const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: 
                         <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${task.completed ? "bg-success border-success" : "border-border"}`}>
                           {task.completed && <span className="text-success-foreground text-[8px]">✓</span>}
                         </div>
-                        <span className={task.completed ? "text-muted-foreground line-through" : "text-foreground"}>{task.title}</span>
+                        <span className={`flex-1 truncate ${task.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>{task.title}</span>
+                        {task.responsible && (
+                          <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                            <User className="w-3 h-3" />
+                            {task.responsible}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
