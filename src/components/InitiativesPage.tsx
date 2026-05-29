@@ -170,6 +170,13 @@ const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: 
     setForm((f) => ({ ...f, tasks: f.tasks.filter((t) => t.id !== id) }));
   };
 
+  const setTaskResponsible = (id: string, responsible: string) => {
+    setForm((f) => ({
+      ...f,
+      tasks: f.tasks.map((t) => (t.id === id ? { ...t, responsible } : t)),
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -264,12 +271,28 @@ const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: 
                   />
                   <Button type="button" variant="outline" onClick={addTask}>Añadir</Button>
                 </div>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
+                <div className="space-y-1.5 max-h-56 overflow-y-auto">
                   {form.tasks.map((t) => (
                     <div key={t.id} className="flex items-center gap-2 text-sm group">
                       <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
-                      <span className={`flex-1 ${t.completed ? "text-muted-foreground line-through" : ""}`}>{t.title}</span>
-                      <button onClick={() => removeTask(t.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-danger">
+                      <span className={`flex-1 min-w-0 truncate ${t.completed ? "text-muted-foreground line-through" : ""}`}>{t.title}</span>
+                      <Select
+                        value={t.responsible || ""}
+                        onValueChange={(v) => setTaskResponsible(t.id, v)}
+                      >
+                        <SelectTrigger className="h-7 w-36 text-xs shrink-0">
+                          <SelectValue placeholder="Responsable" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {team.map((m) => (
+                            <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>
+                          ))}
+                          {t.responsible && !team.some((m) => m.name === t.responsible) && (
+                            <SelectItem value={t.responsible}>{t.responsible} (externo)</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <button onClick={() => removeTask(t.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-danger shrink-0">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -333,7 +356,13 @@ const InitiativesPage = ({ objectives, initiatives, team, onUpsert, onDelete }: 
                         <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${task.completed ? "bg-success border-success" : "border-border"}`}>
                           {task.completed && <span className="text-success-foreground text-[8px]">✓</span>}
                         </div>
-                        <span className={task.completed ? "text-muted-foreground line-through" : "text-foreground"}>{task.title}</span>
+                        <span className={`flex-1 truncate ${task.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>{task.title}</span>
+                        {task.responsible && (
+                          <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                            <User className="w-3 h-3" />
+                            {task.responsible}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
