@@ -283,7 +283,7 @@ const Index = () => {
 
     switch (currentPage) {
       case "okrs":
-        return <OKRsPage objectives={objectives} setObjectives={setObjectives} team={team} checkIns={checkIns} />;
+        return <OKRsPage objectives={objectives} setObjectives={setObjectives} team={team} checkIns={checkIns} isAdmin={isAdmin} onDeleteObjective={handleDeleteObjective} />;
       case "dashboard":
         return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
       case "initiatives":
