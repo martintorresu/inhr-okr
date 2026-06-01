@@ -76,6 +76,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const [extEmail, setExtEmail] = useState("");
   const [extPhone, setExtPhone] = useState("");
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
+  const aiKrReviewEnabled = activeTenantId !== "grupoactitud";
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
