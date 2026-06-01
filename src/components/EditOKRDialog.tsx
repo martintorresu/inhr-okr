@@ -495,6 +495,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         onChange={(e) => updateKR(idx, "weight", e.target.value)}
                       />
                     </div>
+                    {aiKrReviewEnabled && (
                     <KRReviewButton
                       kr_id={kr.id}
                       objective={title}
@@ -519,6 +520,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         })
                       }
                     />
+                    )}
                   </div>
                   <Button
                     type="button"
