@@ -365,7 +365,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
               <Select value={cycle} onValueChange={setCycle}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {cycles.map((c) => (
+                  {cycleOptions.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
