@@ -95,6 +95,15 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
 
+  // Always offer multiple areas (some tenants only define one) and keep the
+  // OKR's current area selectable even if it's not in the tenant list.
+  const areaOptions = uniq([
+    ...(areas.length > 1 ? areas : [...areas, ...fallbackAreas]),
+    area,
+  ]);
+  // Always show the standard quarters plus the current value if it differs.
+  const cycleOptions = uniq([...baseCycles, cycle]);
+
   useEffect(() => {
     if (objective && open) {
       setTitle(objective.title);
