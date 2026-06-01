@@ -101,6 +101,45 @@ export type Database = {
         }
         Relationships: []
       }
+      okr_change_log: {
+        Row: {
+          action: string
+          actor_name: string
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_title: string
+          entity_type: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          actor_name?: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id: string
+          entity_title?: string
+          entity_type: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          actor_name?: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string
+          entity_title?: string
+          entity_type?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       okr_checkin_schedules: {
         Row: {
           created_at: string

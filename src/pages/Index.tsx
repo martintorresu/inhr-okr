@@ -38,6 +38,7 @@ import {
   type CheckInRecord,
   type CheckInSchedule,
 } from "@/lib/checkInsPersistence";
+import { logChange } from "@/lib/changeLogPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
 
@@ -232,6 +233,49 @@ const Index = () => {
     setObjectives((prev) => prev.map((o) => (o.id === objectiveId ? updated : o)));
   };
 
+  const handleDeleteObjective = async (objectiveId: string) => {
+    const target = objectives.find((o) => o.id === objectiveId);
+    if (!target) return;
+
+    // Delete associated initiatives first.
+    const relatedInis = initiatives.filter((i) => i.objectiveId === objectiveId);
+    for (const ini of relatedInis) {
+      await deleteInitiative(activeTenantId, ini.id);
+    }
+
+    // Delete the objective (and its embedded KRs) from persistence.
+    await replaceTenantObjectives(
+      activeTenantId,
+      objectives.filter((o) => o.id !== objectiveId)
+    );
+
+    // Register the change in the audit log.
+    await logChange({
+      tenantId: activeTenantId,
+      action: "delete",
+      entityType: "objective",
+      entityId: objectiveId,
+      entityTitle: target.title,
+      details: {
+        area: target.area,
+        owner: target.owner,
+        keyResultsCount: target.keyResults?.length ?? 0,
+        initiativesDeleted: relatedInis.length,
+      },
+      actorUserId: currentUser.id,
+      actorName: currentUser.name,
+    });
+
+    skipNextPersist.current = true;
+    setObjectives((prev) => prev.filter((o) => o.id !== objectiveId));
+    setInitiatives((prev) => prev.filter((i) => i.objectiveId !== objectiveId));
+    toast.success("OKR eliminado", {
+      description: `Se eliminó "${target.title}" y ${relatedInis.length} iniciativa(s).`,
+    });
+  };
+
+
+
   const renderPage = () => {
     if (!loadedObjectives) {
       return <div className="text-sm text-muted-foreground">Cargando datos...</div>;
@@ -239,7 +283,7 @@ const Index = () => {
 
     switch (currentPage) {
       case "okrs":
-        return <OKRsPage objectives={objectives} setObjectives={setObjectives} team={team} checkIns={checkIns} />;
+        return <OKRsPage objectives={objectives} setObjectives={setObjectives} team={team} checkIns={checkIns} isAdmin={isAdmin} onDeleteObjective={handleDeleteObjective} />;
       case "dashboard":
         return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
       case "initiatives":

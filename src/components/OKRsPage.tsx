@@ -8,19 +8,31 @@ import { activeTenant } from "@/data/tenant";
 import type { TeamMember } from "@/lib/teamPersistence";
 import { withLiveProgress, withCheckInProgress } from "@/lib/okrProgress";
 import type { CheckInRecord } from "@/lib/checkInsPersistence";
-import { ChevronDown, ChevronRight, Target, Pencil } from "lucide-react";
+import { ChevronDown, ChevronRight, Target, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import CreateOKRDialog from "@/components/CreateOKRDialog";
 import EditOKRDialog from "@/components/EditOKRDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface OKRsPageProps {
   objectives?: Objective[];
   setObjectives?: React.Dispatch<React.SetStateAction<Objective[]>>;
   team?: TeamMember[];
   checkIns?: CheckInRecord[];
+  isAdmin?: boolean;
+  onDeleteObjective?: (objectiveId: string) => Promise<void> | void;
 }
 
-const OKRsPage = ({ objectives, setObjectives, team, checkIns = [] }: OKRsPageProps = {}) => {
+const OKRsPage = ({ objectives, setObjectives, team, checkIns = [], isAdmin: isAdminProp, onDeleteObjective }: OKRsPageProps = {}) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ obj1: true });
   // Fallback to internal state if parent doesn't provide controlled state.
   const [internalObjectives, setInternalObjectives] = useState<Objective[]>(defaultObjectives);
@@ -33,7 +45,20 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [] }: OKRsPagePr
 
   // Current user is the tenant's admin (no auth layer in demo). Only admins can edit.
   const currentUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
-  const isAdmin = currentUser?.role === "admin";
+  const isAdmin = isAdminProp ?? currentUser?.role === "admin";
+  const [deleting, setDeleting] = useState<Objective | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleting || !onDeleteObjective) return;
+    setDeleteBusy(true);
+    try {
+      await onDeleteObjective(deleting.id);
+      setDeleting(null);
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
 
   const handleCreateOKR = (newObj: Objective) => {
     updateObjectives((prev) => [newObj, ...prev]);
@@ -108,6 +133,21 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [] }: OKRsPagePr
                     <Pencil className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 )}
+                {isAdmin && onDeleteObjective && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleting(obj);
+                    }}
+                    aria-label="Eliminar OKR"
+                    title="Eliminar OKR e iniciativas"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -159,6 +199,31 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [] }: OKRsPagePr
         onSave={handleSaveEdit}
         team={team}
       />
+
+      <AlertDialog open={!!deleting} onOpenChange={(v) => !v && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este OKR?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará el objetivo <strong>{deleting?.title}</strong>, todos sus Key Results y las
+              iniciativas asociadas. Esta acción quedará registrada en el log de cambios y no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleteBusy}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBusy ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
