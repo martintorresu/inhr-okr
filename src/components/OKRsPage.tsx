@@ -199,6 +199,31 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [], isAdmin: isA
         onSave={handleSaveEdit}
         team={team}
       />
+
+      <AlertDialog open={!!deleting} onOpenChange={(v) => !v && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este OKR?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará el objetivo <strong>{deleting?.title}</strong>, todos sus Key Results y las
+              iniciativas asociadas. Esta acción quedará registrada en el log de cambios y no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleteBusy}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBusy ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
