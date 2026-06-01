@@ -42,7 +42,20 @@ interface EditOKRDialogProps {
   team?: TeamMember[];
 }
 
-const cycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
+const baseCycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
+
+// Fallback list used when a tenant defines too few areas, so the user can
+// always reassign the OKR to a different area.
+const fallbackAreas = [
+  "Dirección General",
+  "Comercial",
+  "Operaciones",
+  "Personas",
+  "Finanzas",
+];
+
+const uniq = (values: string[]) =>
+  Array.from(new Set(values.filter((v) => v && v.trim())));
 
 const emptyKR = (): KRDraft => ({
   title: "",
@@ -81,6 +94,15 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
+
+  // Always offer multiple areas (some tenants only define one) and keep the
+  // OKR's current area selectable even if it's not in the tenant list.
+  const areaOptions = uniq([
+    ...(areas.length > 1 ? areas : [...areas, ...fallbackAreas]),
+    area,
+  ]);
+  // Always show the standard quarters plus the current value if it differs.
+  const cycleOptions = uniq([...baseCycles, cycle]);
 
   useEffect(() => {
     if (objective && open) {
@@ -321,7 +343,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
               <Select value={area} onValueChange={setArea}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (
+                  {areaOptions.map((a) => (
                     <SelectItem key={a} value={a}>{a}</SelectItem>
                   ))}
                 </SelectContent>
@@ -343,7 +365,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
               <Select value={cycle} onValueChange={setCycle}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {cycles.map((c) => (
+                  {cycleOptions.map((c) => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>
