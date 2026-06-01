@@ -38,6 +38,7 @@ import {
   type CheckInRecord,
   type CheckInSchedule,
 } from "@/lib/checkInsPersistence";
+import { logChange } from "@/lib/changeLogPersistence";
 
 const DEMO_TENANTS = new Set<string>(["quimetal"]);
 
