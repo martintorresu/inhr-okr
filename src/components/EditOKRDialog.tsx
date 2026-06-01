@@ -95,6 +95,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
+  const aiKrReviewEnabled = activeTenantId !== "grupoactitud";
 
   // Always offer multiple areas (some tenants only define one) and keep the
   // OKR's current area selectable even if it's not in the tenant list.
