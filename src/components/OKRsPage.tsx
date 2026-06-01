@@ -133,6 +133,21 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [], isAdmin: isA
                     <Pencil className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 )}
+                {isAdmin && onDeleteObjective && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleting(obj);
+                    }}
+                    aria-label="Eliminar OKR"
+                    title="Eliminar OKR e iniciativas"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
