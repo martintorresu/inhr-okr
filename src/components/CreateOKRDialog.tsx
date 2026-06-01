@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, Info, Eye, ArrowLeft, UserPlus, X, Mail, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { areas, users as defaultUsers } from "@/data/mockData";
+import { activeTenantId } from "@/data/tenant";
 import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective } from "@/data/mockData";
 import { toast } from "sonner";
@@ -75,6 +76,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
   const [extEmail, setExtEmail] = useState("");
   const [extPhone, setExtPhone] = useState("");
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
+  const aiKrReviewEnabled = activeTenantId !== "grupoactitud";
 
   const addKR = () => {
     if (keyResults.length >= 8) return;
@@ -468,6 +470,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
                           onChange={(e) => updateKR(idx, "weight", e.target.value)}
                         />
                       </div>
+                      {aiKrReviewEnabled && (
                       <KRReviewButton
                         objective={title}
                         keyResult={kr.title}
@@ -490,6 +493,7 @@ const CreateOKRDialog = ({ onCreateOKR, team }: CreateOKRDialogProps) => {
                           })
                         }
                       />
+                      )}
                     </div>
                     <Button
                       type="button"

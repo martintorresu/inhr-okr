@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { activeTenantId } from "@/data/tenant";
 import { areas, users as defaultUsers } from "@/data/mockData";
 import type { TeamMember } from "@/lib/teamPersistence";
 import type { Objective, KeyResult } from "@/data/mockData";
@@ -94,6 +95,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
   const [pendingObjective, setPendingObjective] = useState<Objective | null>(null);
   const [changeSummary, setChangeSummary] = useState<string[]>([]);
   const [blockedKRs, setBlockedKRs] = useState<Record<number, boolean>>({});
+  const aiKrReviewEnabled = activeTenantId !== "grupoactitud";
 
   // Always offer multiple areas (some tenants only define one) and keep the
   // OKR's current area selectable even if it's not in the tenant list.
@@ -494,6 +496,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         onChange={(e) => updateKR(idx, "weight", e.target.value)}
                       />
                     </div>
+                    {aiKrReviewEnabled && (
                     <KRReviewButton
                       kr_id={kr.id}
                       objective={title}
@@ -518,6 +521,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
                         })
                       }
                     />
+                    )}
                   </div>
                   <Button
                     type="button"
