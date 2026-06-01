@@ -45,7 +45,20 @@ const OKRsPage = ({ objectives, setObjectives, team, checkIns = [], isAdmin: isA
 
   // Current user is the tenant's admin (no auth layer in demo). Only admins can edit.
   const currentUser = activeTenant.users.find((u) => u.role === "admin") ?? activeTenant.users[0];
-  const isAdmin = currentUser?.role === "admin";
+  const isAdmin = isAdminProp ?? currentUser?.role === "admin";
+  const [deleting, setDeleting] = useState<Objective | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleting || !onDeleteObjective) return;
+    setDeleteBusy(true);
+    try {
+      await onDeleteObjective(deleting.id);
+      setDeleting(null);
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
 
   const handleCreateOKR = (newObj: Objective) => {
     updateObjectives((prev) => [newObj, ...prev]);
