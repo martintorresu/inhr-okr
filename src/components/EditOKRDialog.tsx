@@ -343,7 +343,7 @@ const EditOKRDialog = ({ objective, open, onOpenChange, onSave, team }: EditOKRD
               <Select value={area} onValueChange={setArea}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {areas.map((a) => (
+                  {areaOptions.map((a) => (
                     <SelectItem key={a} value={a}>{a}</SelectItem>
                   ))}
                 </SelectContent>
