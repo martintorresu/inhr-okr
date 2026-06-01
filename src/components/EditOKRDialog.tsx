@@ -42,7 +42,20 @@ interface EditOKRDialogProps {
   team?: TeamMember[];
 }
 
-const cycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
+const baseCycles = ["Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026"];
+
+// Fallback list used when a tenant defines too few areas, so the user can
+// always reassign the OKR to a different area.
+const fallbackAreas = [
+  "Dirección General",
+  "Comercial",
+  "Operaciones",
+  "Personas",
+  "Finanzas",
+];
+
+const uniq = (values: string[]) =>
+  Array.from(new Set(values.filter((v) => v && v.trim())));
 
 const emptyKR = (): KRDraft => ({
   title: "",
