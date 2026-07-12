@@ -42,7 +42,8 @@ const navItems = [
   { id: "alerts", label: "Alertas", icon: AlertTriangle },
 ];
 
-const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
+const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0, showAlerts = true }: AppSidebarProps) => {
+  const visibleNavItems = navItems.filter((item) => item.id !== "alerts" || showAlerts);
   const [authUser, setAuthUser] = useState<{ name: string; roleLabel: string } | null>(null);
 
   useEffect(() => {
