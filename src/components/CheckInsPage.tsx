@@ -8,13 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   AlertTriangle, ArrowDown, ArrowRight, ArrowUp, MessageSquare,
-  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
+  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon, CalendarIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import CheckInTimeline from "@/components/CheckInTimeline";
 import KRCheckinsPanel from "@/components/KRCheckinsPanel";
 import ExecutiveDashboard from "@/components/ExecutiveDashboard";
