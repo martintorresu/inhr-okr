@@ -727,6 +727,120 @@ const CheckInEditor = ({
 };
 
 
+const InviteLeadersPanel = ({
+  objectives, team,
+}: {
+  objectives: Objective[];
+  team: TeamMember[];
+}) => {
+  const [sending, setSending] = useState<string | null>(null);
+
+  // Unique OKR leaders (owners), matched to a team member for their email.
+  const leaders = useMemo(() => {
+    const byName = new Map<string, { name: string; email: string; count: number }>();
+    objectives.forEach((o) => {
+      const name = (o.owner ?? "").trim();
+      if (!name) return;
+      const member = team.find((m) => m.name.trim().toLowerCase() === name.toLowerCase());
+      const key = name.toLowerCase();
+      const existing = byName.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        byName.set(key, { name, email: member?.email ?? "", count: 1 });
+      }
+    });
+    return Array.from(byName.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [objectives, team]);
+
+  const invite = async (name: string, email: string) => {
+    if (!email) {
+      toast.error(`${name} no tiene correo en Equipo`);
+      return;
+    }
+    setSending(email);
+    try {
+      const { data, error } = await supabase.functions.invoke("invite-okr-leader", {
+        body: {
+          name,
+          email,
+          appUrl: window.location.origin,
+          tenantId: activeTenantId,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.emailSent) {
+        toast.success(`Invitación enviada a ${name}`, { description: email });
+      } else {
+        toast.error(`No se pudo enviar el correo a ${name}`, {
+          description: data?.emailError ?? undefined,
+        });
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo invitar");
+    } finally {
+      setSending(null);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Invitar líderes de OKR</CardTitle>
+        <p className="text-xs text-muted-foreground mt-1">
+          Envía acceso a la app con credenciales iniciales por correo.
+        </p>
+      </CardHeader>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Líder</TableHead>
+              <TableHead>Correo</TableHead>
+              <TableHead className="text-center w-20">OKRs</TableHead>
+              <TableHead className="text-right w-32">Acción</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {leaders.map((l) => (
+              <TableRow key={l.name}>
+                <TableCell className="text-sm font-medium">{l.name}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {l.email || <span className="text-danger">Sin correo</span>}
+                </TableCell>
+                <TableCell className="text-center text-sm">{l.count}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-2"
+                    disabled={!l.email || sending === l.email}
+                    onClick={() => invite(l.name, l.email)}
+                  >
+                    {sending === l.email
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Mail className="w-3.5 h-3.5" />}
+                    Invitar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {leaders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
+                  No hay líderes de OKR
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+};
+
+
 const SchedulesPanel = ({
   objectives, schedules, onUpsert,
 }: {
