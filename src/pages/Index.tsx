@@ -55,7 +55,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   // Alerts view is disabled for this tenant.
-  const alertsEnabled = activeTenantId !== "inovahr";
+  const alertsEnabled = true;
   const skipNextPersist = useRef(false);
 
   // Hydrate session from Supabase for real-auth tenants.
