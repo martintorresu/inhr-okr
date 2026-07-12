@@ -8,7 +8,7 @@ import OKRsPage from "@/components/OKRsPage";
 import InitiativesPage from "@/components/InitiativesPage";
 import CheckInsPage from "@/components/CheckInsPage";
 import TeamPage from "@/components/TeamPage";
-import AlertsPage, { computeAlerts } from "@/components/AlertsPage";
+import AlertsPage, { computeAlerts, loadDismissedAlerts, ALERTS_DISMISSED_EVENT } from "@/components/AlertsPage";
 import LoginPage from "@/components/LoginPage";
 import { objectives as defaultObjectives, users as defaultUsers, checkIns as defaultCheckIns } from "@/data/mockData";
 import type { Objective } from "@/data/mockData";
@@ -56,7 +56,14 @@ const Index = () => {
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   // Alerts view is disabled for this tenant.
   const alertsEnabled = true;
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => loadDismissedAlerts());
   const skipNextPersist = useRef(false);
+
+  useEffect(() => {
+    const refresh = () => setDismissedAlerts(loadDismissedAlerts());
+    window.addEventListener(ALERTS_DISMISSED_EVENT, refresh);
+    return () => window.removeEventListener(ALERTS_DISMISSED_EVENT, refresh);
+  }, []);
 
   // Hydrate session from Supabase for real-auth tenants.
   useEffect(() => {
@@ -360,7 +367,7 @@ const Index = () => {
   }
 
   const alertsCount = alertsEnabled && loadedObjectives
-    ? computeAlerts(objectives, initiatives, checkIns, schedules).length
+    ? computeAlerts(objectives, initiatives, checkIns, schedules).filter((a) => !dismissedAlerts.has(a.id)).length
     : 0;
 
   return (
