@@ -30,6 +30,7 @@ interface AppSidebarProps {
   onResetDemo: () => void;
   onLogout: () => void;
   alertsCount?: number;
+  showAlerts?: boolean;
 }
 
 const navItems = [
@@ -41,7 +42,8 @@ const navItems = [
   { id: "alerts", label: "Alertas", icon: AlertTriangle },
 ];
 
-const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0 }: AppSidebarProps) => {
+const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout, alertsCount = 0, showAlerts = true }: AppSidebarProps) => {
+  const visibleNavItems = navItems.filter((item) => item.id !== "alerts" || showAlerts);
   const [authUser, setAuthUser] = useState<{ name: string; roleLabel: string } | null>(null);
 
   useEffect(() => {
@@ -152,7 +154,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
 
       {/* Nav */}
       <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 relative z-10">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const showBadge = item.id === "alerts" && alertsCount > 0;
           const active = currentPage === item.id;
           return (

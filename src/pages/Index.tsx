@@ -54,6 +54,8 @@ const Index = () => {
   const [currentUser, setCurrentUser] = useState<{ id: string | null; name: string }>({ id: null, name: "Yo" });
   const [isAdmin, setIsAdmin] = useState(false);
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
+  // Alerts view is disabled for this tenant.
+  const alertsEnabled = activeTenantId !== "inovahr";
   const skipNextPersist = useRef(false);
 
   // Hydrate session from Supabase for real-auth tenants.
@@ -317,6 +319,9 @@ const Index = () => {
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
+        if (!alertsEnabled) {
+          return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
+        }
         return (
           <AlertsPage
             objectives={objectives}
@@ -354,7 +359,7 @@ const Index = () => {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
 
-  const alertsCount = loadedObjectives
+  const alertsCount = alertsEnabled && loadedObjectives
     ? computeAlerts(objectives, initiatives, checkIns, schedules).length
     : 0;
 
@@ -367,6 +372,7 @@ const Index = () => {
         onResetDemo={handleResetDemo}
         onLogout={handleLogout}
         alertsCount={alertsCount}
+        showAlerts={alertsEnabled}
       />
       <a
         href="https://www.inovahr.com"
