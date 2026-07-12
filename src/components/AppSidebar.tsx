@@ -154,7 +154,7 @@ const AppSidebar = ({ currentPage, onNavigate, onLoadDemo, onResetDemo, onLogout
 
       {/* Nav */}
       <nav className="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 relative z-10">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const showBadge = item.id === "alerts" && alertsCount > 0;
           const active = currentPage === item.id;
           return (
