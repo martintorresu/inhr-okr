@@ -359,7 +359,7 @@ const Index = () => {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
 
-  const alertsCount = loadedObjectives
+  const alertsCount = alertsEnabled && loadedObjectives
     ? computeAlerts(objectives, initiatives, checkIns, schedules).length
     : 0;
 
