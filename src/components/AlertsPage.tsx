@@ -1,12 +1,33 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Ban, Bell, ArrowRight } from "lucide-react";
+import { AlertTriangle, Clock, Ban, Bell, ArrowRight, X, Trash2 } from "lucide-react";
+import { activeTenantId } from "@/data/tenant";
 import type { Objective } from "@/data/types";
 import type { InitiativeWithContext } from "@/lib/initiativesPersistence";
 import type { CheckInRecord, CheckInSchedule } from "@/lib/checkInsPersistence";
 
 const STALE_DAYS = 14;
+const DISMISS_KEY = `okr-dismissed-alerts:${activeTenantId}`;
+
+const loadDismissed = (): Set<string> => {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(DISMISS_KEY);
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const saveDismissed = (ids: Set<string>) => {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DISMISS_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* ignore */
+  }
+};
 
 interface AlertsPageProps {
   objectives: Objective[];
@@ -141,11 +162,50 @@ export const computeAlerts = (
   });
 };
 
+// An alert is "obsolete" when its underlying event is in the past:
+// overdue check-ins, past-due pending check-ins, and stale OKRs.
+const isObsolete = (a: AlertItem): boolean => {
+  const todayIso = new Date().toISOString().slice(0, 10);
+  if (a.type === "overdue" || a.type === "stale") return true;
+  if (a.type === "checkin" && a.date < todayIso) return true;
+  return false;
+};
+
 const AlertsPage = ({ objectives, initiatives, checkIns, schedules, onNavigate }: AlertsPageProps) => {
-  const alerts = useMemo(
+  const [dismissed, setDismissed] = useState<Set<string>>(() => loadDismissed());
+
+  const allAlerts = useMemo(
     () => computeAlerts(objectives, initiatives, checkIns, schedules),
     [objectives, initiatives, checkIns, schedules]
   );
+
+  const alerts = useMemo(
+    () => allAlerts.filter((a) => !dismissed.has(a.id)),
+    [allAlerts, dismissed]
+  );
+
+  const obsoleteCount = useMemo(
+    () => alerts.filter(isObsolete).length,
+    [alerts]
+  );
+
+  const dismissOne = useCallback((id: string) => {
+    setDismissed((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      saveDismissed(next);
+      return next;
+    });
+  }, []);
+
+  const clearObsolete = useCallback(() => {
+    setDismissed((prev) => {
+      const next = new Set(prev);
+      alerts.filter(isObsolete).forEach((a) => next.add(a.id));
+      saveDismissed(next);
+      return next;
+    });
+  }, [alerts]);
 
   return (
     <div className="space-y-6">
@@ -154,11 +214,23 @@ const AlertsPage = ({ objectives, initiatives, checkIns, schedules, onNavigate }
           <h2 className="text-2xl font-bold text-foreground">Alertas</h2>
           <p className="text-muted-foreground text-sm mt-1">{alerts.length} alertas activas</p>
         </div>
-        {onNavigate && (
-          <Button variant="outline" size="sm" onClick={() => onNavigate("checkins")} className="gap-2">
-            Ir a check-ins <ArrowRight className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearObsolete}
+            disabled={obsoleteCount === 0}
+            className="gap-2"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Limpiar obsoletas{obsoleteCount > 0 ? ` (${obsoleteCount})` : ""}
           </Button>
-        )}
+          {onNavigate && (
+            <Button variant="outline" size="sm" onClick={() => onNavigate("checkins")} className="gap-2">
+              Ir a check-ins <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {alerts.length === 0 && (
@@ -187,6 +259,14 @@ const AlertsPage = ({ objectives, initiatives, checkIns, schedules, onNavigate }
                 <span className={`text-xs font-semibold uppercase ${isHigh ? "text-danger" : "text-warning"}`}>
                   {isHigh ? "Alta" : "Media"}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => dismissOne(a.id)}
+                  aria-label="Descartar alerta"
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </CardContent>
             </Card>
           );
