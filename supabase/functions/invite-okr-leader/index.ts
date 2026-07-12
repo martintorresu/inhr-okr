@@ -73,6 +73,18 @@ Deno.serve(async (req) => {
 
     const alreadyExists = !!createErr && /already|exists|registered/i.test(createErr.message)
 
+    // If the account already exists, reset its password so the emailed
+    // credentials are valid for re-invites.
+    if (alreadyExists) {
+      const { data: list } = await service.auth.admin.listUsers()
+      const existing = list?.users?.find(
+        (u) => (u.email ?? '').toLowerCase() === email.toLowerCase(),
+      )
+      if (existing) {
+        await service.auth.admin.updateUserById(existing.id, { password })
+      }
+    }
+
     // Send the invite email with credentials.
     const { data: sendData, error: sendErr } = await service.functions.invoke(
       'send-transactional-email',
