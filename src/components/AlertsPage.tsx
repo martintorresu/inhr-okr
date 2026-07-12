@@ -9,8 +9,9 @@ import type { CheckInRecord, CheckInSchedule } from "@/lib/checkInsPersistence";
 
 const STALE_DAYS = 14;
 const DISMISS_KEY = `okr-dismissed-alerts:${activeTenantId}`;
+export const ALERTS_DISMISSED_EVENT = "okr-alerts-dismissed";
 
-const loadDismissed = (): Set<string> => {
+export const loadDismissedAlerts = (): Set<string> => {
   if (typeof window === "undefined") return new Set();
   try {
     const raw = window.localStorage.getItem(DISMISS_KEY);
@@ -24,6 +25,7 @@ const saveDismissed = (ids: Set<string>) => {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(DISMISS_KEY, JSON.stringify([...ids]));
+    window.dispatchEvent(new Event(ALERTS_DISMISSED_EVENT));
   } catch {
     /* ignore */
   }
