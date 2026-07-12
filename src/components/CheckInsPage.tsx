@@ -805,8 +805,24 @@ const SchedulesPanel = ({
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-right text-xs text-muted-foreground">
-                    {s?.nextDueDate ?? "—"}
+                  <TableCell className="text-right">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 font-normal", !s?.nextDueDate && "text-muted-foreground")}>
+                          <CalendarIcon className="w-3.5 h-3.5" />
+                          {s?.nextDueDate ?? "Agendar"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={s?.nextDueDate ? new Date(`${s.nextDueDate}T00:00:00`) : undefined}
+                          onSelect={(d) => d && scheduleNext(o.id, d)}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                 </TableRow>
               );
