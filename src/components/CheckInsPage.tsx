@@ -8,13 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   AlertTriangle, ArrowDown, ArrowRight, ArrowUp, MessageSquare,
-  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon,
+  Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon, CalendarIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import CheckInTimeline from "@/components/CheckInTimeline";
 import KRCheckinsPanel from "@/components/KRCheckinsPanel";
 import ExecutiveDashboard from "@/components/ExecutiveDashboard";
@@ -749,6 +752,23 @@ const SchedulesPanel = ({
     }
   };
 
+  const scheduleNext = async (objId: string, date: Date) => {
+    const existing = byObj[objId];
+    const next: CheckInSchedule = {
+      id: existing?.id ?? `sch-${objId}`,
+      objectiveId: objId,
+      frequency: existing?.frequency ?? "biweekly",
+      nextDueDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+      lastGeneratedAt: existing?.lastGeneratedAt ?? null,
+    };
+    try {
+      await onUpsert(next);
+      toast.success("Próximo check-in agendado");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo guardar");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -785,8 +805,24 @@ const SchedulesPanel = ({
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell className="text-right text-xs text-muted-foreground">
-                    {s?.nextDueDate ?? "—"}
+                  <TableCell className="text-right">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 font-normal", !s?.nextDueDate && "text-muted-foreground")}>
+                          <CalendarIcon className="w-3.5 h-3.5" />
+                          {s?.nextDueDate ?? "Agendar"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar
+                          mode="single"
+                          selected={s?.nextDueDate ? new Date(`${s.nextDueDate}T00:00:00`) : undefined}
+                          onSelect={(d) => d && scheduleNext(o.id, d)}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                 </TableRow>
               );
