@@ -16,7 +16,10 @@ import {
 import {
   AlertTriangle, ArrowDown, ArrowRight, ArrowUp, MessageSquare,
   Plus, Trash2, Pencil, ShieldCheck, LineChart as LineChartIcon, CalendarIcon,
+  Mail, Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { activeTenantId } from "@/data/tenant";
 import { cn } from "@/lib/utils";
 import CheckInTimeline from "@/components/CheckInTimeline";
 import KRCheckinsPanel from "@/components/KRCheckinsPanel";
