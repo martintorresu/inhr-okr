@@ -319,6 +319,9 @@ const Index = () => {
       case "team":
         return <TeamPage team={team} onUpsert={handleTeamUpsert} onDelete={handleTeamDelete} />;
       case "alerts":
+        if (!alertsEnabled) {
+          return <DashboardPage objectives={objectives} initiatives={initiatives} checkIns={checkIns} />;
+        }
         return (
           <AlertsPage
             objectives={objectives}
