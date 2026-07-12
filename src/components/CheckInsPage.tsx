@@ -752,6 +752,23 @@ const SchedulesPanel = ({
     }
   };
 
+  const scheduleNext = async (objId: string, date: Date) => {
+    const existing = byObj[objId];
+    const next: CheckInSchedule = {
+      id: existing?.id ?? `sch-${objId}`,
+      objectiveId: objId,
+      frequency: existing?.frequency ?? "biweekly",
+      nextDueDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+      lastGeneratedAt: existing?.lastGeneratedAt ?? null,
+    };
+    try {
+      await onUpsert(next);
+      toast.success("Próximo check-in agendado");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo guardar");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
