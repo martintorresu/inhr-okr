@@ -174,7 +174,7 @@ const isObsolete = (a: AlertItem): boolean => {
 };
 
 const AlertsPage = ({ objectives, initiatives, checkIns, schedules, onNavigate }: AlertsPageProps) => {
-  const [dismissed, setDismissed] = useState<Set<string>>(() => loadDismissed());
+  const [dismissed, setDismissed] = useState<Set<string>>(() => loadDismissedAlerts());
 
   const allAlerts = useMemo(
     () => computeAlerts(objectives, initiatives, checkIns, schedules),
