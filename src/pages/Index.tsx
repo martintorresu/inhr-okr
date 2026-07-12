@@ -56,7 +56,14 @@ const Index = () => {
   const isDemoTenant = DEMO_TENANTS.has(activeTenantId);
   // Alerts view is disabled for this tenant.
   const alertsEnabled = true;
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => loadDismissedAlerts());
   const skipNextPersist = useRef(false);
+
+  useEffect(() => {
+    const refresh = () => setDismissedAlerts(loadDismissedAlerts());
+    window.addEventListener(ALERTS_DISMISSED_EVENT, refresh);
+    return () => window.removeEventListener(ALERTS_DISMISSED_EVENT, refresh);
+  }, []);
 
   // Hydrate session from Supabase for real-auth tenants.
   useEffect(() => {
