@@ -145,9 +145,4 @@ export const checkIns: CheckIn[] = [
   { id: "ci5", objectiveId: "obj5", date: "2026-03-15", comment: "Plataforma de reconocimiento bloqueada por presupuesto.", progress: 28, blockers: "Aprobación de presupuesto pendiente", author: "Laura Vega" },
 ];
 
-export const alerts: Alert[] = [
-  { id: "a1", type: "risk", message: "OKR 'Expandir presencia LATAM' en riesgo — 38% de avance", objectiveId: "obj3", date: "2026-04-05", severity: "high" },
-  { id: "a2", type: "blocked", message: "Iniciativa 'Programa de reconocimiento' bloqueada", objectiveId: "obj5", date: "2026-04-03", severity: "high" },
-  { id: "a3", type: "checkin", message: "Check-in pendiente para 'Cultura de alto desempeño'", objectiveId: "obj5", date: "2026-04-07", severity: "medium" },
-  { id: "a4", type: "overdue", message: "Iniciativa 'Content marketing LATAM' retrasada", objectiveId: "obj3", date: "2026-04-06", severity: "medium" },
-];
+export const alerts: Alert[] = [];
