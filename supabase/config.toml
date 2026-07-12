@@ -19,3 +19,5 @@ project_id = "nlpczneghixtbwtsrqxl"
     verify_jwt = false
   [functions.invite-okr-users]
     verify_jwt = false
+  [functions.invite-okr-leader]
+    verify_jwt = false
