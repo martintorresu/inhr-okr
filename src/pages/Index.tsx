@@ -372,6 +372,7 @@ const Index = () => {
         onResetDemo={handleResetDemo}
         onLogout={handleLogout}
         alertsCount={alertsCount}
+        showAlerts={alertsEnabled}
       />
       <a
         href="https://www.inovahr.com"
