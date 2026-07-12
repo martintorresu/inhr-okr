@@ -367,7 +367,7 @@ const Index = () => {
   }
 
   const alertsCount = alertsEnabled && loadedObjectives
-    ? computeAlerts(objectives, initiatives, checkIns, schedules).length
+    ? computeAlerts(objectives, initiatives, checkIns, schedules).filter((a) => !dismissedAlerts.has(a.id)).length
     : 0;
 
   return (
