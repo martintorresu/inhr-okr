@@ -354,6 +354,8 @@ const CheckInsPage = ({
             </CardContent>
           </Card>
 
+          <InviteLeadersPanel objectives={objectives} team={team} />
+
           <SchedulesPanel
             objectives={objectives}
             schedules={schedules}
